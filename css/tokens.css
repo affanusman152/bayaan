@@ -1,0 +1,72 @@
+/* ══════════════════════════════════════════════════════════
+   BAYAAN — Design tokens
+   Palette lifted from the guild's poster system:
+   ink black · deep maroon · qalam gold · parchment cream
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── colour ── */
+  --ink:        #0A0607;
+  --ink-2:      #140B0C;
+  --ink-3:      #1E1011;
+
+  --maroon-deep:#4E0509;
+  --maroon:     #7C0F14;
+  --maroon-hot: #A9161C;
+
+  --gold-deep:  #B27A16;
+  --gold:       #E3A72F;
+  --gold-lite:  #F6D68A;
+
+  --cream:      #F6EFE3;
+  --cream-dim:  #CDBFAE;
+  --muted:      #8E7F74;
+
+  --line:       rgba(246, 214, 138, .16);
+  --line-soft:  rgba(246, 239, 227, .08);
+  --glass:      rgba(20, 11, 12, .72);
+
+  /* ── type ── */
+  --f-display: 'Bebas Neue', 'Impact', sans-serif;
+  --f-body:    'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-serif:   'Cormorant Garamond', Georgia, serif;
+  --f-urdu:    'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+
+  /* fluid scale — mobile first, desktop resolves itself */
+  --t-xs:   clamp(.68rem, .62rem + .3vw, .78rem);
+  --t-sm:   clamp(.8rem,  .74rem + .35vw, .92rem);
+  --t-base: clamp(.95rem, .88rem + .45vw, 1.08rem);
+  --t-lg:   clamp(1.15rem, 1rem + 1vw, 1.5rem);
+  --t-xl:   clamp(1.7rem, 1.3rem + 2.6vw, 3rem);
+  --t-2xl:  clamp(2.4rem, 1.6rem + 5.2vw, 5.5rem);
+  --t-hero: clamp(4.2rem, 2rem + 15vw, 11rem);
+
+  /* ── space ── */
+  --gut:   clamp(1.15rem, .8rem + 2.4vw, 3.5rem);
+  --stack: clamp(2.6rem, 1.6rem + 4.5vw, 6rem);
+  --bar:   62px;
+
+  /* ── radius / depth ── */
+  --r-sm: 8px;
+  --r:    16px;
+  --r-lg: 26px;
+  --shadow: 0 24px 60px -22px rgba(0,0,0,.9);
+  --shadow-gold: 0 18px 50px -20px rgba(227,167,47,.45);
+
+  /* ── easing: the whole personality lives here ── */
+  --e-ink:    cubic-bezier(.22, 1, .36, 1);      /* settle, like ink drying   */
+  --e-swift:  cubic-bezier(.45, 0, .15, 1);      /* decisive stage wipes      */
+  --e-spring: cubic-bezier(.34, 1.56, .64, 1);   /* seal press / pop          */
+  --e-glide:  cubic-bezier(.65, .05, .36, 1);    /* drawer + curtain          */
+
+  --d-fast: .28s;
+  --d-mid:  .62s;
+  --d-slow: 1.05s;
+
+  --z-stage: 1;
+  --z-bar:   40;
+  --z-scrim: 50;
+  --z-drawer:60;
+  --z-curtain:80;
+
+}

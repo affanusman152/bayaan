@@ -1,0 +1,60 @@
+/* ══════════════ MOTION UTILITIES ══════════════
+   Everything scroll-triggered goes through [data-reveal].
+   JS only toggles .is-in — timing lives here.
+   ════════════════════════════════════════════════ */
+
+[data-reveal] {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    opacity .85s var(--e-ink) calc(var(--d, 0) * .08s),
+    transform .95s var(--e-ink) calc(var(--d, 0) * .08s),
+    filter .85s var(--e-ink) calc(var(--d, 0) * .08s);
+}
+[data-reveal="up"]    { transform: translateY(32px); filter: blur(4px); }
+[data-reveal="left"]  { transform: translateX(-32px); }
+[data-reveal="right"] { transform: translateX(32px); }
+[data-reveal="scale"] { transform: scale(.9); filter: blur(6px); }
+[data-reveal].is-in   { opacity: 1; transform: none; filter: blur(0); }
+
+/* ── screen entrance: the incoming view rises out of the wipe ── */
+.screen.is-entering { animation: screenIn .8s var(--e-ink) both; }
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(26px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── screen exit ── */
+.screen.is-leaving { animation: screenOut .34s var(--e-swift) both; }
+@keyframes screenOut {
+  to { opacity: 0; transform: scale(.97); filter: blur(3px); }
+}
+
+/* ── magnetic buttons follow the cursor a little (pointer devices only) ── */
+[data-magnetic] { transition: transform .5s var(--e-ink); }
+@media (hover: none) {
+  [data-magnetic] { transform: none !important; }
+}
+
+/* ── boot state: nothing peeks out before the curtain lifts ── */
+body.is-booting #stage,
+body.is-booting .topbar,
+body.is-booting .scrollnib { opacity: 0; }
+
+body:not(.is-booting) #stage,
+body:not(.is-booting) .topbar,
+body:not(.is-booting) .scrollnib {
+  animation: bootFade .7s var(--e-ink) both;
+}
+@keyframes bootFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── a slow gold shimmer for anything tagged .shimmer ── */
+.shimmer {
+  background: linear-gradient(100deg, var(--gold-deep), var(--gold-lite) 45%, var(--gold-deep));
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerRun 5s linear infinite;
+}
+@keyframes shimmerRun { to { background-position: -220% 0; } }

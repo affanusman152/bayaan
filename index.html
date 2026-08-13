@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0A0607" />
+<title>Bayaan — FAST NUCES Multan</title>
+<meta name="description" content="Bayaan — the literature, public speaking &amp; dramatics society of FAST NUCES Multan. Debate. Theatre. Creative Writing." />
+
+<link rel="icon" href="assets/logo.png" />
+<link rel="apple-touch-icon" href="assets/logo.png" />
+<meta property="og:title" content="Bayaan — FAST NUCES Multan" />
+<meta property="og:description" content="Debate · Theatre · Creative Writing. حرف سے حرف تک" />
+<meta property="og:image" content="assets/logo.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/logo.css" />
+<link rel="stylesheet" href="css/ui.css" />
+<link rel="stylesheet" href="css/screens.css" />
+<link rel="stylesheet" href="css/motion.css" />
+</head>
+<body class="is-booting">
+
+<!-- ═══════════════════ AMBIENCE LAYERS ═══════════════════ -->
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="aura" id="aura" aria-hidden="true"></div>
+
+<!-- ═══════════════════ CURTAIN ═══════════════════
+     One animation, two jobs: the intro on load, and every
+     screen-to-screen transition after it. -->
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i>
+  <span class="curtain__seal">
+    <img class="logo-img" src="assets/logo.png" alt="" />
+    <b class="logo-fallback">بیان</b>
+  </span>
+</div>
+
+<!-- ═══════════════════ TOP BAR ═══════════════════ -->
+<header class="topbar" id="topbar">
+  <a class="brand" href="#/home" data-link>
+    <span class="brand__mark" id="brandMark">
+      <img class="logo-img" src="assets/logo.png" alt="Bayaan" />
+      <svg class="logo-fallback" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="56" fill="none" stroke="var(--gold-deep)" stroke-width="2" opacity=".55"/>
+        <path d="M 22 74 C 26 92 60 100 88 88 C 104 81 112 66 116 50"
+              fill="none" stroke="var(--gold)" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="40" cy="44" r="7" fill="var(--gold-lite)"/>
+        <circle cx="62" cy="44" r="7" fill="var(--gold-lite)"/>
+      </svg>
+    </span>
+    <span class="brand__text">
+      <b>BAYAAN</b>
+      <i>FAST NUCES · Multan</i>
+    </span>
+  </a>
+
+  <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="scrollnib" id="scrollnib" aria-hidden="true"><i></i></div>
+
+<!-- ═══════════════════ SIDE DRAWER ═══════════════════ -->
+<div class="scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="Main navigation" aria-hidden="true">
+  <span class="drawer__watermark" aria-hidden="true">
+    <img class="logo-img" src="assets/logo.png" alt="" />
+    <b class="logo-fallback">بیان</b>
+  </span>
+
+  <div class="drawer__head">
+    <span class="drawer__eyebrow">Menu</span>
+    <button class="drawer__close" id="drawerClose" type="button" aria-label="Close menu">&times;</button>
+  </div>
+
+  <ul class="drawer__list" id="drawerList">
+    <li style="--i:0"><a href="#/home"     data-link><em>01</em><span>Home</span><u>ابتدا</u></a></li>
+    <li style="--i:1"><a href="#/about"    data-link><em>02</em><span>The Society</span><u>تعارف</u></a></li>
+    <li style="--i:2"><a href="#/wings"    data-link><em>03</em><span>Our Wings</span><u>شعبے</u></a></li>
+    <li style="--i:3"><a href="#/ventures" data-link><em>04</em><span>Ventures</span><u>سرگرمیاں</u></a></li>
+    <li style="--i:4"><a href="#/team"     data-link><em>05</em><span>Council '26</span><u>کونسل</u></a></li>
+    <li style="--i:5"><a href="#/join"     data-link><em>06</em><span>Join Bayaan</span><u>شمولیت</u></a></li>
+  </ul>
+
+  <div class="drawer__foot">
+    <p class="drawer__couplet">نرم دم گفتگو، گرم دم جستجو</p>
+    <div class="drawer__socials">
+      <a href="https://instagram.com/bayaan_fast" target="_blank" rel="noopener">Instagram</a>
+      <a href="#/join" data-link>Register</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ SCREENS ═══════════════════ -->
+<main id="stage">
+
+  <!-- ───────── HOME ───────── -->
+  <section class="screen" id="screen-home" data-screen="home">
+    <div class="hero">
+
+      <!-- full-bleed photo stage: duotone, ken-burns, ink-wipe on entry -->
+      <div class="hero__stage" data-photo-reveal aria-hidden="true">
+        <img class="hero__photo" id="heroPhoto" src="assets/hero.jpg" alt="" />
+        <span class="hero__fallback">
+          <img class="logo-img" src="assets/logo.png" alt="" />
+        </span>
+        <span class="hero__tint"></span>
+        <span class="hero__lift"></span>
+        <span class="hero__scrim"></span>
+        <span class="hero__curtain"></span>
+      </div>
+
+      <p class="hero__eyebrow" data-reveal="up" style="--d:0">
+        <i></i> Literary &amp; Public Speaking Society
+      </p>
+
+      <h1 class="hero__head" data-line-reveal>One stage. One family.</h1>
+
+      <p class="hero__couplet" data-word-reveal>
+        نرم دم گفتگو گرم دم جستجو
+      </p>
+
+      <p class="hero__sub" data-reveal="up" style="--d:3">
+        Debate, declamation, MUN, theatre and the written line — every kind of
+        expression at FAST NUCES Multan, under one roof.
+      </p>
+
+      <div class="hero__cta" data-reveal="up" style="--d:4">
+        <a class="btn btn--gold" href="#/join" data-link data-magnetic>
+          <span>Become a Bayaani</span>
+        </a>
+        <a class="btn btn--ghost" href="#/wings" data-link data-magnetic>
+          <span>Explore our wings</span>
+        </a>
+      </div>
+
+      <div class="hero__stats" data-reveal="up" style="--d:5">
+        <div><b data-count="6">0</b><span>Wings</span></div>
+        <div><b data-count="12">0</b><span>Ventures</span></div>
+        <div><b data-count="150" data-suffix="+">0</b><span>Bayaanis</span></div>
+      </div>
+
+    </div>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__row" id="tickerRow"></div>
+    </div>
+  </section>
+
+  <!-- ───────── ABOUT ───────── -->
+  <section class="screen" id="screen-about" data-screen="about" hidden>
+    <header class="pagehead">
+      <p class="pagehead__kicker" data-reveal="up">02 — تعارف</p>
+      <h2 class="pagehead__title" data-line-reveal>The Society</h2>
+      <p class="pagehead__lede" data-reveal="up" style="--d:2">
+        Bayaan is the umbrella under which every form of expression at FAST NUCES
+        Multan lives — the argued word, the performed word, the written word.
+      </p>
+    </header>
+
+    <div class="wrap">
+      <article class="prose" data-reveal="up" style="--d:0">
+        <p><span class="dropcap">B</span>ayaan began as a simple idea: a campus needs a
+        place where people are heard. Not just the loudest — the sharpest, the softest,
+        the funniest, the ones still finding the courage to stand up. <em>Placeholder copy —
+        replace with the society's real founding note.</em></p>
+        <p>Today we run debates and declamations, send delegations to MUNs, stage plays,
+        publish student writing, and turn ordinary Tuesday evenings into open mics.</p>
+      </article>
+
+      <ul class="pillars">
+        <li data-reveal="up" style="--d:0"><b>Voice</b><span>Train it, sharpen it, use it well.</span></li>
+        <li data-reveal="up" style="--d:1"><b>Craft</b><span>Writing, staging, arguing — as skills.</span></li>
+        <li data-reveal="up" style="--d:2"><b>Family</b><span>Seniors who show up. Juniors who stay.</span></li>
+      </ul>
+
+      <blockquote class="pullquote" data-reveal="scale">
+        <p class="pullquote__ur">حرف سے حرف تک</p>
+        <cite>— our flagship literary showcase</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ───────── WINGS ───────── -->
+  <section class="screen" id="screen-wings" data-screen="wings" hidden>
+    <header class="pagehead">
+      <p class="pagehead__kicker" data-reveal="up">03 — شعبے</p>
+      <h2 class="pagehead__title" data-line-reveal>Our Wings</h2>
+      <p class="pagehead__lede" data-reveal="up" style="--d:2">
+        Six directions, one society. Swipe through — you can belong to more than one.
+      </p>
+    </header>
+    <div class="rail" id="wingsRail" role="list"></div>
+    <div class="rail__dots" id="wingsDots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ───────── VENTURES ───────── -->
+  <section class="screen" id="screen-ventures" data-screen="ventures" hidden>
+    <header class="pagehead">
+      <p class="pagehead__kicker" data-reveal="up">04 — سرگرمیاں</p>
+      <h2 class="pagehead__title" data-line-reveal>Ventures</h2>
+      <p class="pagehead__lede" data-reveal="up" style="--d:2">
+        A running record of what Bayaan puts on — competitions, showcases, walks,
+        workshops. The list keeps growing.
+      </p>
+    </header>
+    <div class="timeline" id="timeline">
+      <span class="timeline__spine" aria-hidden="true"><i id="spineFill"></i></span>
+    </div>
+  </section>
+
+  <!-- ───────── TEAM ───────── -->
+  <section class="screen" id="screen-team" data-screen="team" hidden>
+    <header class="pagehead">
+      <p class="pagehead__kicker" data-reveal="up">05 — کونسل</p>
+      <h2 class="pagehead__title" data-line-reveal>Executive Council '26</h2>
+      <p class="pagehead__lede" data-reveal="up" style="--d:2">
+        The people who carry it. Mentors, office bearers, and the crew behind every event.
+      </p>
+    </header>
+    <div class="team" id="teamGrid"></div>
+  </section>
+
+  <!-- ───────── JOIN ───────── -->
+  <section class="screen" id="screen-join" data-screen="join" hidden>
+    <div class="join">
+      <div class="join__seal" data-reveal="scale" aria-hidden="true">
+        <img class="logo-img" src="assets/logo.png" alt="" />
+        <span class="logo-fallback">بیان</span>
+      </div>
+      <h2 class="join__title" data-line-reveal>Become a Bayaani</h2>
+      <p class="join__lede" data-reveal="up" style="--d:2">
+        Registrations open every semester. No auditions to walk in — bring curiosity,
+        we'll handle the rest.
+      </p>
+
+      <ol class="steps">
+        <li data-reveal="up" style="--d:0"><b>01</b><span>Fill the registration form</span></li>
+        <li data-reveal="up" style="--d:1"><b>02</b><span>Pick your wings at orientation</span></li>
+        <li data-reveal="up" style="--d:2"><b>03</b><span>Show up. That's genuinely it.</span></li>
+      </ol>
+
+      <a class="btn btn--gold btn--lg" id="joinBtn" href="#" target="_blank" rel="noopener" data-magnetic>
+        <span>Open registration form</span>
+      </a>
+      <p class="join__note" data-reveal="up" style="--d:4">
+        Placeholder link — drop the real Google Form URL in <code>js/data.js</code>.
+      </p>
+
+      <footer class="foot">
+        <p class="foot__ur">حرف سے حرف تک</p>
+        <p class="foot__meta">Bayaan · FAST NUCES Multan Campus · <span id="year"></span></p>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/motion.js"></script>
+<script src="js/render.js"></script>
+<script src="js/drawer.js"></script>
+<script src="js/router.js"></script>
+<script src="js/intro.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

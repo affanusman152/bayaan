@@ -1,0 +1,53 @@
+/* ══════════════════════════════════════════════════════════
+   THE MARK
+   The supplied artwork carries its own alpha, so it is placed
+   untouched. `screen` blending stays as a fallback for a
+   black-background export: black drops out, the white
+   calligraphy and gold mic/brush stay lit.
+
+   Two sources live side by side:
+     .logo-img       the real artwork      (shown when it loads)
+     .logo-fallback  vector / type stand-in (shown when it doesn't)
+   js/logo.js flips `has-logo` / `no-logo` on <body>.
+   ══════════════════════════════════════════════════════════ */
+
+.logo-img { display: none; mix-blend-mode: screen; }
+body.has-logo .logo-img      { display: block; }
+body.has-logo .logo-fallback { display: none; }
+
+/* a file with its own alpha, or one we keyed at load, needs no blend trick */
+body.logo-keyed .logo-img,
+body.logo-alpha .logo-img { mix-blend-mode: normal; }
+
+/* ── header mark ── */
+.brand__mark {
+  position: relative;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  opacity: 0;
+  transform: scale(.4) rotate(-25deg);
+  transition: transform .8s var(--e-spring), opacity .5s;
+}
+.brand__mark.is-in { opacity: 1; transform: none; }
+.brand__mark .logo-img { width: 100%; height: 100%; object-fit: contain; }
+.brand:hover .brand__mark { animation: markNudge .6s var(--e-ink); }
+@keyframes markNudge { 50% { transform: rotate(-8deg) scale(1.08); } }
+
+/* the hero carries a photo now — the mark lives in the bar, curtain seal,
+   drawer watermark, join seal and team cards */
+
+/* ── curtain seal ── */
+.curtain__seal .logo-img { width: min(58vw, 320px); }
+
+/* ── drawer watermark ── */
+.drawer__watermark .logo-img { width: 340px; opacity: .1; }
+
+/* ── join seal ── */
+.join__seal .logo-img { width: 86%; }
+
+/* ── team card placeholder ── */
+.member__photo .logo-img { width: 78%; opacity: .18; }
+
+/* ── hero fallback panel, until assets/hero.jpg exists ── */
+.hero__fallback .logo-img { mix-blend-mode: screen; }
+body.logo-alpha .hero__fallback .logo-img { mix-blend-mode: normal; }
