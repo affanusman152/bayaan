@@ -30,6 +30,7 @@ const BAYAAN = {
     {
       name: "Debating",
       ur: "مناظرہ",
+      family: "speaking",
       desc: "Parliamentary, bilingual, and campus-league debating. We train, we spar, we travel.",
       tags: ["Parliamentary", "Bilingual", "Inter-uni"],
       icon: `<path d="M14 58 h44 M22 58 V30 M50 58 V30 M18 30 h40 M26 30 V18 h20 v12"/>
@@ -38,6 +39,7 @@ const BAYAAN = {
     {
       name: "Declamation",
       ur: "تقریر",
+      family: "speaking",
       desc: "One speaker, one podium, one idea worth defending. English and Urdu tracks.",
       tags: ["Urdu", "English", "Solo"],
       icon: `<rect x="26" y="12" width="20" height="30" rx="10"/>
@@ -48,6 +50,7 @@ const BAYAAN = {
     {
       name: "MUN & Diplomacy",
       ur: "سفارت",
+      family: "speaking",
       desc: "Delegations, position papers, committee crises. Bayaan's window to the world.",
       tags: ["Delegation", "Position papers", "Crisis"],
       icon: `<circle cx="36" cy="36" r="24"/>
@@ -56,6 +59,7 @@ const BAYAAN = {
     {
       name: "Creative Writing",
       ur: "ادب",
+      family: "literary",
       desc: "Nazm, afsana, essay, blog. We publish student work and run writing circles.",
       tags: ["Nazm", "Afsana", "Essay"],
       icon: `<path d="M20 60 L18 46 L48 16 a6 6 0 0 1 8 8 L26 54 Z"/>
@@ -65,6 +69,7 @@ const BAYAAN = {
     {
       name: "Dramatics",
       ur: "ڈرامہ",
+      family: "literary",
       desc: "Scripts, stage, lights, and a cast that shows up to every rehearsal.",
       tags: ["Stage", "Script", "Improv"],
       icon: `<path d="M10 22 h26 v18 a13 13 0 0 1 -26 0 Z"/>
@@ -75,6 +80,7 @@ const BAYAAN = {
     {
       name: "Open Mic & Poetry",
       ur: "محفل",
+      family: "literary",
       desc: "Bait bazi, mushaira, spoken word. The evening where anyone can take the floor.",
       tags: ["Mushaira", "Bait bazi", "Spoken word"],
       icon: `<circle cx="36" cy="24" r="12"/>
@@ -89,8 +95,10 @@ const BAYAAN = {
     {
       year: "2026",
       title: "Harf se Harf Tak",
+      ur: "حرف سے حرف تک",
+      flagship: true,                                  // ← the main event; styled apart in the timeline
       meta: ["Flagship", "Literary showcase"],
-      desc: "Our signature literary evening — readings, performances and the year's best student writing on one stage."
+      desc: "Our signature literary evening and the biggest thing Bayaan has staged — readings, performances and the year's best student writing on one stage."
     },
     {
       year: "2026",

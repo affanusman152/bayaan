@@ -225,27 +225,5 @@ const Motion = (() => {
     frame();
   }
 
-  /* ── horizontal rail → dot indicator ────────────── */
-  function railDots(rail, dots) {
-    if (!rail || !dots) return;
-    const cards = [...rail.children];
-    dots.innerHTML = cards.map(() => '<i></i>').join('');
-    const marks = [...dots.children];
-
-    const sync = () => {
-      const mid = rail.scrollLeft + rail.clientWidth / 2;
-      let best = 0, bd = Infinity;
-      cards.forEach((c, i) => {
-        const cmid = c.offsetLeft + c.offsetWidth / 2;
-        const d = Math.abs(cmid - mid);
-        if (d < bd) { bd = d; best = i; }
-      });
-      marks.forEach((m, i) => m.classList.toggle('on', i === best));
-      cards.forEach((c, i) => c.classList.toggle('is-focus', i === best));
-    };
-    rail.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
-    sync();
-  }
-
-  return { REDUCED, COARSE, splitLines, splitWords, observe, reset, magnetic, aura, scrollFX, railDots, prepIcons };
+  return { REDUCED, COARSE, splitLines, splitWords, observe, reset, magnetic, aura, scrollFX, prepIcons };
 })();

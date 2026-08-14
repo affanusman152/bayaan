@@ -398,58 +398,244 @@ body.has-hero .hero__fallback { display: none; }
   color: var(--muted);
 }
 
-/* ─────────────── WINGS RAIL ─────────────── */
-.rail {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: .5rem var(--gut) 1.6rem;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+/* ─────────────── WINGS: the umbrella, then the index ───────────────
+   This screen answers "what is Bayaan?" twice: once with a photograph of a real
+   Bayaan night, and once as a plain index of the six wings, split into the two
+   halves the society is actually named after. */
+
+/* ── the umbrella band ── */
+.umbrella {
+  position: relative;
+  margin: 0 0 clamp(2.4rem, 6vw, 4.4rem);
 }
-.rail::-webkit-scrollbar { display: none; }
+
+.umbrella__shot {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+  isolation: isolate;
+}
+.umbrella__shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  /* biased low: the ceiling is the biggest thing in the frame and the least
+     interesting — this drops most of it and keeps the screen, the lights and
+     the room full of people */
+  object-position: center 84%;
+  /* the hall was lit by a projector and a string of fairy lights. Lift it far
+     enough to read the room, not so far that the dark it was shot in is gone */
+  filter: brightness(1.46) contrast(1.04) saturate(1.16);
+}
+
+.umbrella__tint, .umbrella__scrim, .umbrella__curtain {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+/* light touch: the room's own reds and fairy lights are already on-palette */
+.umbrella__tint {
+  background: linear-gradient(150deg, var(--maroon-deep), transparent 55%, var(--gold-deep));
+  mix-blend-mode: color;
+  opacity: .4;
+}
+.umbrella__scrim {
+  background:
+    radial-gradient(80% 70% at 50% 44%, transparent, rgba(10,6,7,.52) 100%),
+    linear-gradient(180deg, rgba(10,6,7,.5) 0%, transparent 34%, rgba(10,6,7,.88) 100%);
+}
+.umbrella__curtain {
+  background: linear-gradient(180deg, var(--maroon), var(--maroon-deep));
+  transform-origin: bottom;
+  transform: scaleY(0);          /* resting state open — see the hero */
+}
+.umbrella.is-in .umbrella__curtain { animation: inkLift 1s var(--e-swift) both; }
+
+.umbrella__body {
+  display: grid;
+  gap: .7rem;
+  justify-items: start;
+  width: min(100%, 1120px);
+  margin-inline: auto;
+  padding: 1.5rem var(--gut) 0;
+}
+.umbrella__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-family: var(--f-display);
+  font-size: var(--t-sm);
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.umbrella__kicker i { width: 26px; height: 1px; background: var(--gold); }
+
+.umbrella__head {
+  font-family: var(--f-display);
+  font-size: clamp(1.9rem, 1.1rem + 3.6vw, 3.3rem);
+  line-height: 1;
+  letter-spacing: .02em;
+  color: var(--cream);
+}
+.umbrella__head .ln { display: block; overflow: hidden; }
+.umbrella__head .ln > i { display: block; font-style: normal; transform: translateY(105%); }
+.umbrella__head.is-in .ln > i {
+  animation: lineUp .9s var(--e-ink) forwards;
+  animation-delay: calc(var(--li, 0) * .1s);
+}
+
+.umbrella__note { max-width: 46ch; color: var(--cream-dim); font-size: var(--t-base); }
+.umbrella__note em { font-style: normal; color: var(--gold-lite); }
+
+.umbrella__cap {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: var(--t-xs);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.umbrella__cap i {
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  background: var(--maroon-hot);
+  box-shadow: 0 0 10px 2px rgba(169,22,28,.7);
+}
+
+/* wide enough to letterbox the room and set the type into it */
+@media (min-width: 900px) {
+  .umbrella__shot img { aspect-ratio: 16 / 9; }
+  .umbrella__body {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding-bottom: clamp(1.6rem, 3.6vw, 3rem);
+  }
+  .umbrella__note { max-width: 42ch; }
+}
+
+/* ── the index ── */
+.wingdex {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.2rem);
+}
+
+.fam__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem .9rem;
+  padding: 0 var(--gut) .8rem;
+}
+.fam__label {
+  font-family: var(--f-display);
+  font-size: clamp(1.05rem, .8rem + 1.1vw, 1.5rem);
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.fam__ur {
+  font-family: var(--f-urdu);
+  font-size: 1.1rem;
+  line-height: 2;
+  color: var(--gold-lite);
+  direction: rtl;
+}
+.fam__head i {
+  flex: 1 1 30px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+.fam__note, .fam__count {
+  font-size: var(--t-xs);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fam__count { color: var(--gold-deep); white-space: nowrap; }
+
+.fam__rows { border-top: 1px solid var(--line-soft); }
 
 .wing {
-  scroll-snap-align: center;
-  flex: 0 0 min(78vw, 340px);
   position: relative;
-  min-height: 400px;
-  padding: 1.6rem;
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--r-lg);
-  border: 1px solid var(--line-soft);
-  background:
-    radial-gradient(120% 80% at 100% 0%, rgba(169,22,28,.42), transparent 60%),
-    linear-gradient(180deg, rgba(30,16,17,.9), rgba(10,6,7,.95));
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  grid-template-areas:
+    "num  ur"
+    "icon body";
+  align-items: start;
+  gap: .5rem .9rem;
+  padding: 1.4rem var(--gut);
+  border-bottom: 1px solid var(--line-soft);
   overflow: hidden;
   isolation: isolate;
-  transition: transform .6s var(--e-ink), border-color .5s, box-shadow .6s;
 }
-.wing::after {
-  content: "";
+.wing__num  { grid-area: num; }
+.wing__icon { grid-area: icon; }
+.wing__body { grid-area: body; }
+.wing__ur   { grid-area: ur; justify-self: end; }
+
+/* the row entrance — resting state is OPEN, the animation only plays it in */
+.wing.is-in { animation: rowIn .7s var(--e-ink) both; }
+@keyframes rowIn { from { opacity: 0; transform: translateY(18px); } }
+.wing:nth-child(2).is-in { animation-delay: .07s; }
+.wing:nth-child(3).is-in { animation-delay: .14s; }
+.wing:nth-child(4).is-in { animation-delay: .21s; }
+
+/* the maroon wash that sweeps in from the left on hover */
+.wing__wash {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(60% 45% at 50% 110%, rgba(227,167,47,.22), transparent 70%);
-  opacity: 0;
-  transition: opacity .6s;
+  background: linear-gradient(90deg, rgba(124,15,20,.62), rgba(169,22,28,.26) 46%, transparent 78%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .6s var(--e-ink);
 }
-.wing:hover, .wing.is-focus {
-  transform: translateY(-8px);
-  border-color: var(--line);
-  box-shadow: var(--shadow);
+.wing:hover .wing__wash,
+.wing:focus-within .wing__wash { transform: scaleX(1); }
+
+/* gold spine, the same device as the pillars */
+.wing::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(var(--gold-lite), var(--maroon-hot));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .5s var(--e-ink);
 }
-.wing:hover::after, .wing.is-focus::after { opacity: 1; }
+.wing:hover::before,
+.wing:focus-within::before { transform: scaleY(1); }
+
+@media (min-width: 720px) {
+  .wing {
+    grid-template-columns: 3.4rem 84px 1fr auto;
+    grid-template-areas: "num icon body ur";
+    align-items: center;
+    gap: 1.4rem;
+    padding: 1.75rem var(--gut);
+  }
+}
 
 .wing__num {
   font-family: var(--f-display);
-  font-size: .78rem;
-  letter-spacing: .3em;
+  font-size: clamp(1.1rem, .9rem + 1vw, 1.7rem);
+  letter-spacing: .08em;
+  line-height: 1;
   color: var(--gold-deep);
+  transition: color .4s;
 }
-.wing__icon { width: 74px; height: 74px; margin: 1.4rem 0 1rem; }
+.wing:hover .wing__num,
+.wing:focus-within .wing__num { color: var(--gold); }
+
+.wing__icon { width: 54px; height: 54px; }
+@media (min-width: 720px) { .wing__icon { width: 84px; height: 84px; } }
 .wing__icon path, .wing__icon circle, .wing__icon line, .wing__icon rect {
   stroke: var(--gold);
   stroke-width: 2.4;
@@ -470,21 +656,29 @@ body.has-hero .hero__fallback { display: none; }
 
 .wing__ur {
   font-family: var(--f-urdu);
-  font-size: 1.5rem;
+  font-size: clamp(1.15rem, 4.2vw, 1.9rem);
   line-height: 2.1;
   color: var(--gold-lite);
   direction: rtl;
+  opacity: .8;
+  transition: opacity .4s, transform .5s var(--e-ink);
 }
+.wing:hover .wing__ur,
+.wing:focus-within .wing__ur { opacity: 1; transform: translateX(-5px); }
+
 .wing__name {
   font-family: var(--f-display);
-  font-size: 1.9rem;
-  letter-spacing: .08em;
-  line-height: 1.05;
+  font-size: clamp(1.45rem, 1rem + 2.4vw, 2.5rem);
+  letter-spacing: .05em;
+  line-height: 1.04;
   color: var(--cream);
-  margin-top: .2rem;
+  transition: color .4s, transform .5s var(--e-ink);
 }
-.wing__desc { margin-top: .6rem; color: var(--cream-dim); font-size: var(--t-sm); }
-.wing__tags { margin-top: auto; padding-top: 1.2rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.wing:hover .wing__name,
+.wing:focus-within .wing__name { color: var(--gold-lite); transform: translateX(6px); }
+
+.wing__desc { margin-top: .35rem; max-width: 58ch; color: var(--cream-dim); font-size: var(--t-sm); }
+.wing__tags { margin-top: .7rem; display: flex; flex-wrap: wrap; gap: .4rem; }
 .wing__tags span {
   font-size: .62rem;
   letter-spacing: .16em;
@@ -494,15 +688,6 @@ body.has-hero .hero__fallback { display: none; }
   border: 1px solid var(--line);
   color: var(--gold-lite);
 }
-
-.rail__dots { display: flex; justify-content: center; gap: .4rem; }
-.rail__dots i {
-  width: 6px; height: 6px;
-  border-radius: 999px;
-  background: rgba(246,239,227,.2);
-  transition: width .4s var(--e-ink), background .4s;
-}
-.rail__dots i.on { width: 22px; background: var(--gold); }
 
 /* ─────────────── TIMELINE / VENTURES ─────────────── */
 .timeline {
@@ -542,10 +727,43 @@ body.has-hero .hero__fallback { display: none; }
   transform: scale(1.12);
 }
 .vt__year {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
   font-family: var(--f-display);
   font-size: .74rem;
   letter-spacing: .28em;
   color: var(--gold-deep);
+}
+
+/* ── the flagship — Harf se Harf Tak is the main event, so it is not just
+      another row on the list ── */
+.vt--flag {
+  padding: 1.3rem 1.3rem 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(169,22,28,.34), transparent 62%),
+    linear-gradient(180deg, rgba(30,16,17,.72), rgba(10,6,7,.5));
+}
+.vt--flag::before { left: -40px; top: 1.85rem; }
+.vt--flag .vt__year b {
+  font-weight: 400;
+  letter-spacing: .18em;
+  color: var(--ink);
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold) 50%, var(--gold-lite));
+  padding: .2rem .6rem;
+  border-radius: 999px;
+}
+.vt--flag .vt__title { font-size: clamp(1.6rem, 7vw, 2.6rem); color: var(--gold-lite); }
+.vt__ur {
+  font-family: var(--f-urdu);
+  font-size: 1.3rem;
+  line-height: 2.2;
+  color: var(--cream);
+  direction: rtl;
+  margin-bottom: .2rem;
 }
 .vt__title {
   font-family: var(--f-display);
@@ -769,9 +987,6 @@ body.has-hero .hero__fallback { display: none; }
   .team { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
 
   .pillars { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-
-  .rail { padding-inline: max(var(--gut), calc((100vw - 1120px) / 2)); gap: 1.4rem; }
-  .wing { flex-basis: 330px; }
 
   .hero__sub { font-size: var(--t-lg); }
 

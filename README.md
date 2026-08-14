@@ -60,8 +60,8 @@ the way ink behaves. Three rules the whole scaffold obeys:
 | 05 | **Screen transitions** | The same four-panel curtain as the intro. Outgoing screen scales + blurs out; incoming rises out of the wipe. |
 | 06 | **Drawer** | Headed **Contents / فہرست**. Slides on `--e-glide`, items stagger in from the right, each row reveals its Urdu name and a gold underline on hover. Burger morphs to an X. Urdu watermark drifts behind it. Swipe-right closes; edge-swipe from the right rim opens. Foot carries two chips — an outlined **Instagram** with its glyph, and **Register** in the same gold as the hero CTA. |
 | 07 | **Page titles** | Split into masked lines that slide up with a slight rotation. |
-| 08 | **Wing cards** | Horizontal snap rail; each card's line-icon **draws itself** (`stroke-dashoffset`) when it scrolls in. Centre card auto-focuses with a gold under-glow, dots track position. |
-| 09 | **Ventures** | Vertical timeline whose gold spine **fills as you scroll**; each node lights up and rings when its entry enters view. |
+| 08 | **Wings** | An **index, not a rail**. A full-bleed band of the induction night opens the screen and names the umbrella, then the six wings are listed under the two halves the society is actually named after — *Public Speaking* and *Literary*. Each row sweeps a maroon wash in from the left on hover, grows the gold spine borrowed from the pillars, and its line-icon **draws itself** (`stroke-dashoffset`) when it scrolls in. |
+| 09 | **Ventures** | Vertical timeline whose gold spine **fills as you scroll**; each node lights up and rings when its entry enters view. **Harf se Harf Tak** — the society's main event — is lifted out of the plain list into a bordered flagship card with a gold badge and its Urdu title. |
 | 10 | **Team** | Poster-style cards where a maroon curtain **lifts off each portrait**, staggered — the same feel as your council posters. |
 | 11 | **Stats** | Count up from zero on first view. |
 | 12 | **Ambience** | Film grain, vignette, a maroon aura that tracks the pointer (drifts on scroll for touch), a gold scroll-progress nib on the right edge, hiding-on-scroll top bar, magnetic buttons on pointer devices, and a paused-on-hover couplet ticker. There is **no scroll-down hint** at the foot of the hero — it was removed. |
@@ -93,8 +93,9 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 |---|---|
 | Registration form link | `BAYAAN.config.joinFormUrl` |
 | Ticker couplets | `BAYAAN.ticker` |
-| Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` |
-| Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` |
+| Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
+| Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
+| Induction photo (the wings band) | `assets/induction.jpg`, referenced directly in `index.html` |
 | Council members + section bands | `BAYAAN.team` |
 | Logo path | `BAYAAN.config.logo` |
 | Hero photo | `BAYAAN.config.heroPhoto` — the file lives at `assets/hero.jpg` ✅ *installed* |
