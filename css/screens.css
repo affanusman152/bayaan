@@ -783,4 +783,47 @@ body.has-hero .hero__fallback { display: none; }
 @media (min-width: 1024px) {
   .hero__stats { gap: 4rem; }
   .join__title { font-size: clamp(3rem, 6vw, 5rem); }
+
+  /* ── DESKTOP HERO: back to the full-bleed overlay ──
+     Deliberate, and chosen with the trade known: the photo sits behind the whole
+     type block again, so below roughly 1800px wide the headline crosses the back
+     row's faces. Wanted for the drama on a big screen. The split stage-band
+     layout is kept below this breakpoint, where the crop is far more brutal and
+     the overlap unavoidable — so phones keep the photo as its own band. */
+  .hero { grid-template-rows: 1fr; }
+
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    height: auto;
+  }
+
+  .hero__type {
+    align-content: end;
+    padding: calc(var(--bar) + env(safe-area-inset-top) + var(--stack)) var(--gut) 4.6rem;
+  }
+
+  .hero__photo {
+    object-position: center 32%;
+    filter: grayscale(1) contrast(1.14) brightness(.78);
+  }
+
+  .hero__tint { opacity: .92; }
+  .hero__lift { background: radial-gradient(78% 58% at 50% 14%, rgba(246,214,138,.30), transparent 66%); }
+  .hero__scrim {
+    background: linear-gradient(180deg,
+      rgba(10,6,7,.62) 0%,
+      rgba(10,6,7,.22) 30%,
+      rgba(10,6,7,.86) 78%,
+      var(--ink) 100%);
+  }
+  .hero__edge { display: none; }   /* no stage lip when the photo bleeds */
+
+  /* the original type rhythm — there is room for it again once the band is gone */
+  .hero__head    { font-size: clamp(2.6rem, 1.4rem + 8.5vw, 5.4rem); }
+  .hero__couplet { font-size: clamp(1.05rem, 4.6vw, 1.8rem); }
+  .hero__sub     { margin-top: 1rem; }
+  .hero__cta     { margin-top: 2rem; }
+  .hero__stats   { margin-top: 2.8rem; padding-top: 1.6rem; }
 }

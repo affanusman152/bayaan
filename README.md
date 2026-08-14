@@ -55,7 +55,7 @@ the way ink behaves. Three rules the whole scaffold obeys:
 |---|-------|--------------|
 | 01 | **Intro** | The **same curtain as the page transitions**, deliberately. Four maroon panels wipe up in a stagger, the بیان seal holds at centre, then they wipe away. Not a separate animation: `js/intro.js` drives the router's own `#curtain` element and its `is-in` / `is-out` classes, so the way the site opens and the way it moves are one gesture and cannot drift apart. |
 | 02 | **Intro → site** | The header mark springs in as the panels clear; the stage fades up behind them. |
-| 03 | **Hero** | Split into two zones so **type never sets over a face**: the headline owns the upper field, and the group photo is a **stage band** across the foot — the society standing under the title. Greyscaled then **duotoned** to maroon shadows / gold highlights via blend layers, with a maroon ink curtain lifting off it on load and a slow 14s ken-burns push-in. Headline splits into masked lines that slide up. Falls back to a designed maroon panel when no photo is present. |
+| 03 | **Hero** | **Two layouts, split at 1024px.** Desktop is the full-bleed overlay: the photo bleeds behind the whole type block, greyscaled then **duotoned** to maroon shadows / gold highlights via blend layers, with a maroon ink curtain lifting off it on load and a slow 14s ken-burns push-in. Below 1024px it becomes two zones instead — headline up top, photo as a **stage band** across the foot, the society standing under the title. Headline splits into masked lines that slide up. Falls back to a designed maroon panel when no photo is present. |
 | 04 | **Hero couplet** | Per-word bloom — each word rises out of a blur, sequenced **right to left** so it reads as it appears. |
 | 05 | **Screen transitions** | The same four-panel curtain as the intro. Outgoing screen scales + blurs out; incoming rises out of the wipe. |
 | 06 | **Drawer** | Headed **Contents / فہرست**. Slides on `--e-glide`, items stagger in from the right, each row reveals its Urdu name and a gold underline on hover. Burger morphs to an X. Urdu watermark drifts behind it. Swipe-right closes; edge-swipe from the right rim opens. Foot carries two chips — an outlined **Instagram** with its glyph, and **Register** in the same gold as the hero CTA. |
@@ -70,6 +70,14 @@ the way ink behaves. Three rules the whole scaffold obeys:
 
 Everything degrades correctly under `prefers-reduced-motion: reduce` — reveals fire instantly
 and the curtain is skipped entirely, intro included.
+
+**A known trade, chosen on purpose.** On desktop the type sits over the photograph, so on
+viewports narrower than roughly 1800px the headline crosses the back row's faces. That is
+accepted for the full-bleed drama on a large screen. It is *not* accepted on phones — a 3:2
+group shot under `object-fit: cover` in a portrait viewport keeps only about the middle
+third, which is why the stage-band layout takes over below 1024px. If you ever want the
+band on desktop too, delete the `.hero` overrides in the `min-width: 1024px` block of
+`css/screens.css`; the band is the default and needs nothing else.
 
 **A rule the scaffold follows:** no decorative animation is allowed to be the thing that makes
 content visible. Every reveal has an *open* resting state and animates from an explicit `from`
