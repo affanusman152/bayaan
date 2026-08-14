@@ -15,7 +15,7 @@ const Drawer = (() => {
     drawer.classList.toggle('is-open', open);
     drawer.setAttribute('aria-hidden', String(!open));
     burger.setAttribute('aria-expanded', String(open));
-    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    burger.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     document.body.classList.toggle('is-locked', open);
 
     if (open) {

@@ -62,7 +62,7 @@
     </span>
   </a>
 
-  <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+  <button class="burger" id="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="drawer">
     <span></span><span></span><span></span>
   </button>
 </header>
@@ -78,8 +78,8 @@
   </span>
 
   <div class="drawer__head">
-    <span class="drawer__eyebrow">Menu</span>
-    <button class="drawer__close" id="drawerClose" type="button" aria-label="Close menu">&times;</button>
+    <span class="drawer__eyebrow">Contents <b>فہرست</b></span>
+    <button class="drawer__close" id="drawerClose" type="button" aria-label="Close navigation">&times;</button>
   </div>
 
   <ul class="drawer__list" id="drawerList">
@@ -94,8 +94,20 @@
   <div class="drawer__foot">
     <p class="drawer__couplet">نرم دم گفتگو، گرم دم جستجو</p>
     <div class="drawer__socials">
-      <a href="https://instagram.com/bayaan_fast" target="_blank" rel="noopener">Instagram</a>
-      <a href="#/join" data-link>Register</a>
+      <a class="drawer__link" href="https://instagram.com/bayaan_fast" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="18" height="18" rx="5.2"/>
+          <circle cx="12" cy="12" r="4.1"/>
+          <circle cx="17.3" cy="6.7" r="1.2" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>Instagram</span>
+      </a>
+      <a class="drawer__link drawer__link--gold" href="#/join" data-link>
+        <span>Register</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M5 12h13M12.5 6l6 6-6 6"/>
+        </svg>
+      </a>
     </div>
   </div>
 </nav>
@@ -107,7 +119,41 @@
   <section class="screen" id="screen-home" data-screen="home">
     <div class="hero">
 
-      <!-- full-bleed photo stage: duotone, ken-burns, ink-wipe on entry -->
+      <!-- type field: owns the upper zone outright, so nothing ever sets on a face -->
+      <div class="hero__type">
+        <p class="hero__eyebrow" data-reveal="up" style="--d:0">
+          <i></i> Literary &amp; Public Speaking Society
+        </p>
+
+        <h1 class="hero__head" data-line-reveal>One stage. One family.</h1>
+
+        <p class="hero__couplet" data-word-reveal>
+          نرم دم گفتگو گرم دم جستجو
+        </p>
+
+        <p class="hero__sub" data-reveal="up" style="--d:3">
+          Debate, declamation, MUN, theatre and the written line — every kind of
+          expression at FAST NUCES Multan, under one roof.
+        </p>
+
+        <div class="hero__cta" data-reveal="up" style="--d:4">
+          <a class="btn btn--gold" href="#/join" data-link data-magnetic>
+            <span>Become a Bayaani</span>
+          </a>
+          <a class="btn btn--ghost" href="#/wings" data-link data-magnetic>
+            <span>Explore our wings</span>
+          </a>
+        </div>
+
+        <div class="hero__stats" data-reveal="up" style="--d:5">
+          <div><b data-count="6">0</b><span>Wings</span></div>
+          <div><b data-count="12">0</b><span>Ventures</span></div>
+          <div><b data-count="150" data-suffix="+">0</b><span>Bayaanis</span></div>
+        </div>
+      </div>
+
+      <!-- the stage: the society stands on it, under the title. duotone, ken-burns,
+           ink-wipe on entry — and no type is ever laid over it -->
       <div class="hero__stage" data-photo-reveal aria-hidden="true">
         <img class="hero__photo" id="heroPhoto" src="assets/hero.jpg" alt="" />
         <span class="hero__fallback">
@@ -116,37 +162,8 @@
         <span class="hero__tint"></span>
         <span class="hero__lift"></span>
         <span class="hero__scrim"></span>
+        <span class="hero__edge"></span>
         <span class="hero__curtain"></span>
-      </div>
-
-      <p class="hero__eyebrow" data-reveal="up" style="--d:0">
-        <i></i> Literary &amp; Public Speaking Society
-      </p>
-
-      <h1 class="hero__head" data-line-reveal>One stage. One family.</h1>
-
-      <p class="hero__couplet" data-word-reveal>
-        نرم دم گفتگو گرم دم جستجو
-      </p>
-
-      <p class="hero__sub" data-reveal="up" style="--d:3">
-        Debate, declamation, MUN, theatre and the written line — every kind of
-        expression at FAST NUCES Multan, under one roof.
-      </p>
-
-      <div class="hero__cta" data-reveal="up" style="--d:4">
-        <a class="btn btn--gold" href="#/join" data-link data-magnetic>
-          <span>Become a Bayaani</span>
-        </a>
-        <a class="btn btn--ghost" href="#/wings" data-link data-magnetic>
-          <span>Explore our wings</span>
-        </a>
-      </div>
-
-      <div class="hero__stats" data-reveal="up" style="--d:5">
-        <div><b data-count="6">0</b><span>Wings</span></div>
-        <div><b data-count="12">0</b><span>Ventures</span></div>
-        <div><b data-count="150" data-suffix="+">0</b><span>Bayaanis</span></div>
       </div>
 
     </div>

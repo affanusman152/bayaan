@@ -11,25 +11,38 @@
 .screen[hidden] { display: none; }
 
 /* ─────────────── HERO ─────────────── */
-/* Pulled up under the top bar so the photo bleeds to the very top edge. */
+/* Two zones, never one. The old hero laid the whole type block over a full-bleed
+   photo, which on any real viewport put the headline straight across the back
+   row's faces — a 3:2 group shot has people through its whole middle, so there
+   is no safe overlay position. So the hero is split instead: type owns the upper
+   field, the photograph is a stage band along the bottom, and the society stands
+   on it under the title. Nothing overlaps, at any width, and it reads the way the
+   headline does — one stage, one family. */
 .hero {
   position: relative;
   min-height: 100svh;
   margin-top: calc(-1 * (var(--bar) + env(safe-area-inset-top)));
-  padding: calc(var(--bar) + env(safe-area-inset-top) + var(--stack)) var(--gut) 4.6rem;
   display: grid;
-  align-content: end;
-  justify-items: center;
-  text-align: center;
+  grid-template-rows: 1fr auto;
   overflow: hidden;
   isolation: isolate;          /* keeps the duotone blending inside the stage */
+  background: linear-gradient(168deg, var(--maroon-deep) 0%, var(--ink-2) 54%, var(--ink) 100%);
 }
 
-/* ── the photo stage ── */
+.hero__type {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: calc(var(--bar) + env(safe-area-inset-top) + .5rem) var(--gut) 1rem;
+}
+
+/* ── the photo stage ──
+   30vh keeps the whole hero inside 100svh on a laptop (~880px) so the band is
+   never pushed under the fold — if it were, its reveal would never fire. */
 .hero__stage {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
+  position: relative;
+  height: clamp(190px, 30vh, 420px);
   overflow: hidden;
   isolation: isolate;
   background: linear-gradient(165deg, var(--maroon) 0%, var(--maroon-deep) 45%, var(--ink) 100%);
@@ -39,8 +52,9 @@
   display: none;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center 32%;
-  filter: grayscale(1) contrast(1.14) brightness(.78);
+  /* holds the face band inside a short, wide box */
+  object-position: center 40%;
+  filter: grayscale(1) contrast(1.08) brightness(.9);
 }
 body.has-hero .hero__photo { display: block; }
 body.has-hero .hero__stage.is-in .hero__photo {
@@ -60,26 +74,36 @@ body.has-hero .hero__stage.is-in .hero__photo {
 body.has-hero .hero__fallback { display: none; }
 
 /* duotone: maroon shadows, gold highlights */
-.hero__tint, .hero__lift, .hero__scrim, .hero__curtain {
+.hero__tint, .hero__lift, .hero__scrim, .hero__edge, .hero__curtain {
   position: absolute;
   inset: 0;
   display: block;
 }
+/* eased off .92 → .58: the band is now the one place the society is actually
+   looked at, so the duotone stays for brand and the faces stay readable */
 .hero__tint {
   background: linear-gradient(155deg, var(--maroon-deep) 0%, var(--maroon-hot) 58%, var(--gold-deep) 100%);
   mix-blend-mode: color;
-  opacity: .92;
+  opacity: .58;
 }
 .hero__lift {
-  background: radial-gradient(78% 58% at 50% 14%, rgba(246,214,138,.30), transparent 66%);
+  background: radial-gradient(72% 96% at 50% 0%, rgba(246,214,138,.22), transparent 70%);
   mix-blend-mode: overlay;
 }
+/* melts the top edge into the type field and weights the foot — the middle,
+   where the faces sit, is left deliberately clear */
 .hero__scrim {
   background: linear-gradient(180deg,
-    rgba(10,6,7,.62) 0%,
-    rgba(10,6,7,.22) 30%,
-    rgba(10,6,7,.86) 78%,
-    var(--ink) 100%);
+    var(--ink) 0%,
+    rgba(10,6,7,.55) 10%,
+    rgba(10,6,7,0) 38%,
+    rgba(10,6,7,.44) 100%);
+}
+/* the stage lip */
+.hero__edge {
+  background:
+    linear-gradient(90deg, transparent, var(--gold) 22%, var(--gold-lite) 50%, var(--gold) 78%, transparent) top / 100% 1px no-repeat;
+  opacity: .5;
 }
 
 /* the ink wipe that uncovers it all — resting state is OPEN, so a reveal that
@@ -116,7 +140,7 @@ body.has-hero .hero__fallback { display: none; }
 /* the headline that carries the hero */
 .hero__head {
   font-family: var(--f-display);
-  font-size: clamp(2.6rem, 1.4rem + 8.5vw, 5.4rem);
+  font-size: clamp(2.6rem, 1.4rem + 8.5vw, 5.2rem);
   line-height: .92;
   letter-spacing: .01em;
   margin: .3rem 0 .1rem;
@@ -133,7 +157,7 @@ body.has-hero .hero__fallback { display: none; }
 .hero__couplet {
   direction: rtl;
   font-family: var(--f-urdu);
-  font-size: clamp(1.05rem, 4.6vw, 1.8rem);
+  font-size: clamp(1.05rem, 4.6vw, 1.7rem);
   line-height: 2.5;
   color: var(--gold-lite);
   max-width: 22ch;
@@ -154,7 +178,7 @@ body.has-hero .hero__fallback { display: none; }
 
 .hero__sub {
   max-width: 44ch;
-  margin-top: 1rem;
+  margin-top: .8rem;
   color: var(--cream-dim);
   font-size: var(--t-base);
   text-shadow: 0 4px 18px rgba(0,0,0,.8);
@@ -165,14 +189,15 @@ body.has-hero .hero__fallback { display: none; }
   flex-wrap: wrap;
   justify-content: center;
   gap: .8rem;
-  margin-top: 2rem;
+  margin-top: 1.2rem;
 }
 
+/* tightened from 2.8/1.6 — the type field shares the hero with the stage band now */
 .hero__stats {
   display: flex;
   gap: clamp(1.4rem, 7vw, 3.4rem);
-  margin-top: 2.8rem;
-  padding-top: 1.6rem;
+  margin-top: 1.2rem;
+  padding-top: .8rem;
   border-top: 1px solid var(--line-soft);
 }
 .hero__stats div { display: grid; gap: .1rem; }

@@ -55,10 +55,10 @@ the way ink behaves. Three rules the whole scaffold obeys:
 |---|-------|--------------|
 | 01 | **Intro** | The **same curtain as the page transitions**, deliberately. Four maroon panels wipe up in a stagger, the بیان seal holds at centre, then they wipe away. Not a separate animation: `js/intro.js` drives the router's own `#curtain` element and its `is-in` / `is-out` classes, so the way the site opens and the way it moves are one gesture and cannot drift apart. |
 | 02 | **Intro → site** | The header mark springs in as the panels clear; the stage fades up behind them. |
-| 03 | **Hero** | Full-bleed group photo, greyscaled then **duotoned** to maroon shadows / gold highlights via blend layers. A maroon ink curtain lifts off it on load while the photo runs a slow 14s ken-burns push-in. Headline splits into masked lines that slide up. Falls back to a designed maroon panel when no photo is present. |
+| 03 | **Hero** | Split into two zones so **type never sets over a face**: the headline owns the upper field, and the group photo is a **stage band** across the foot — the society standing under the title. Greyscaled then **duotoned** to maroon shadows / gold highlights via blend layers, with a maroon ink curtain lifting off it on load and a slow 14s ken-burns push-in. Headline splits into masked lines that slide up. Falls back to a designed maroon panel when no photo is present. |
 | 04 | **Hero couplet** | Per-word bloom — each word rises out of a blur, sequenced **right to left** so it reads as it appears. |
 | 05 | **Screen transitions** | The same four-panel curtain as the intro. Outgoing screen scales + blurs out; incoming rises out of the wipe. |
-| 06 | **Drawer** | Slides on `--e-glide`, items stagger in from the right, each row reveals its Urdu name and a gold underline on hover. Burger morphs to an X. Urdu watermark drifts behind it. Swipe-right closes; edge-swipe from the right rim opens. |
+| 06 | **Drawer** | Headed **Contents / فہرست**. Slides on `--e-glide`, items stagger in from the right, each row reveals its Urdu name and a gold underline on hover. Burger morphs to an X. Urdu watermark drifts behind it. Swipe-right closes; edge-swipe from the right rim opens. Foot carries two chips — an outlined **Instagram** with its glyph, and **Register** in the same gold as the hero CTA. |
 | 07 | **Page titles** | Split into masked lines that slide up with a slight rotation. |
 | 08 | **Wing cards** | Horizontal snap rail; each card's line-icon **draws itself** (`stroke-dashoffset`) when it scrolls in. Centre card auto-focuses with a gold under-glow, dots track position. |
 | 09 | **Ventures** | Vertical timeline whose gold spine **fills as you scroll**; each node lights up and rings when its entry enters view. |
@@ -66,7 +66,7 @@ the way ink behaves. Three rules the whole scaffold obeys:
 | 11 | **Stats** | Count up from zero on first view. |
 | 12 | **Ambience** | Film grain, vignette, a maroon aura that tracks the pointer (drifts on scroll for touch), a gold scroll-progress nib on the right edge, hiding-on-scroll top bar, magnetic buttons on pointer devices, and a paused-on-hover couplet ticker. There is **no scroll-down hint** at the foot of the hero — it was removed. |
 | 13 | **Join** | Breathing wax seal, staggered steps, gold CTA with a cream fill that rises from the bottom. |
-| 14 | **Group frame** (About) | The same group photograph as the hero, but shown **uncropped and untinted** — the one place the picture is the subject rather than the backdrop. Gold poster corner-ticks frame it, and the hero's own `inkLift` curtain wipes off it when it scrolls in. Deliberate: a 3:2 group shot cannot survive a full-bleed portrait crop (`object-fit: cover` on a phone shows roughly the middle third), so the hero uses it for atmosphere and this frame carries the record. |
+| 14 | **Group frame** (About) | The same group photograph as the hero, but shown **uncropped and untinted** — the hero band crops to the faces, this is the whole picture in true colour. Gold poster corner-ticks frame it, and the hero's own `inkLift` curtain wipes off it when it scrolls in. |
 
 Everything degrades correctly under `prefers-reduced-motion: reduce` — reveals fire instantly
 and the curtain is skipped entirely, intro included.
