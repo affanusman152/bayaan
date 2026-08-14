@@ -276,6 +276,79 @@ body.has-hero .hero__fallback { display: none; }
 }
 .pillars span { color: var(--cream-dim); font-size: var(--t-sm); }
 
+/* ── the group shot, shown straight ──
+   The hero wears this same photograph as atmosphere: greyscaled, duotoned,
+   cropped hard by a portrait viewport. Here it is left alone — full frame,
+   true colour, nothing over it but the frame and the curtain that opens it. */
+.groupshot { margin: 2.6rem 0 0; }
+
+.groupshot__frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--ink-2);
+  box-shadow: var(--shadow);
+  isolation: isolate;
+}
+.groupshot__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;      /* reserves the box before load — no shift */
+  object-fit: cover;
+}
+
+/* gold corner ticks — the poster framing device, borrowed from the council posters */
+.groupshot__frame::before,
+.groupshot__frame::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  width: 26px; height: 26px;
+  border: 2px solid var(--gold);
+  opacity: .7;
+  pointer-events: none;
+}
+.groupshot__frame::before { top: 10px;    left: 10px;  border-right: 0; border-bottom: 0; }
+.groupshot__frame::after  { bottom: 10px; right: 10px; border-left: 0;  border-top: 0; }
+
+/* same ink wipe as the hero, and the same rule: resting state is OPEN, so a
+   reveal that never fires costs the animation and never the photograph */
+.groupshot__curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, var(--maroon), var(--maroon-deep));
+  transform-origin: bottom;
+  transform: scaleY(0);
+}
+.groupshot.is-in .groupshot__curtain { animation: inkLift .95s var(--e-swift) both; }
+
+.groupshot__cap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .4rem 1rem;
+  margin-top: .9rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--line-soft);
+}
+.groupshot__ur {
+  font-family: var(--f-urdu);
+  font-size: 1.15rem;
+  line-height: 2;
+  color: var(--gold-lite);
+  direction: rtl;
+}
+.groupshot__en {
+  font-size: var(--t-xs);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .pullquote {
   margin: 3rem auto 0;
   text-align: center;

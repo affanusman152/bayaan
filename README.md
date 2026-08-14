@@ -66,6 +66,7 @@ the way ink behaves. Three rules the whole scaffold obeys:
 | 11 | **Stats** | Count up from zero on first view. |
 | 12 | **Ambience** | Film grain, vignette, a maroon aura that tracks the pointer (drifts on scroll for touch), a gold scroll-progress nib on the right edge, hiding-on-scroll top bar, magnetic buttons on pointer devices, and a paused-on-hover couplet ticker. There is **no scroll-down hint** at the foot of the hero — it was removed. |
 | 13 | **Join** | Breathing wax seal, staggered steps, gold CTA with a cream fill that rises from the bottom. |
+| 14 | **Group frame** (About) | The same group photograph as the hero, but shown **uncropped and untinted** — the one place the picture is the subject rather than the backdrop. Gold poster corner-ticks frame it, and the hero's own `inkLift` curtain wipes off it when it scrolls in. Deliberate: a 3:2 group shot cannot survive a full-bleed portrait crop (`object-fit: cover` on a phone shows roughly the middle third), so the hero uses it for atmosphere and this frame carries the record. |
 
 Everything degrades correctly under `prefers-reduced-motion: reduce` — reveals fire instantly
 and the curtain is skipped entirely, intro included.
@@ -88,7 +89,8 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` |
 | Council members + section bands | `BAYAAN.team` |
 | Logo path | `BAYAAN.config.logo` |
-| Hero photo | `BAYAAN.config.heroPhoto` (drop the file at `assets/hero.jpg`) |
+| Hero photo | `BAYAAN.config.heroPhoto` — the file lives at `assets/hero.jpg` ✅ *installed* |
+| The About group frame | it points at `assets/hero.jpg` directly, in `index.html` — replace the file and both it and the hero follow |
 | Intro hold | `BAYAAN.config.introMs` |
 | Society prose, pillars, join steps | directly in `index.html` |
 
