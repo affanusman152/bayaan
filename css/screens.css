@@ -854,10 +854,23 @@ body.has-hero .hero__fallback { display: none; }
 .member__photo {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
   display: grid;
   place-items: center;
   padding-bottom: 26%;
+}
+
+/* the real portrait, when one has been dropped in. Sits at the same level as the
+   placeholder but later in the DOM, so it simply covers it — and both stay under
+   the ::after gradient that keeps the name legible. */
+.member__shot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;   /* faces sit high in a 3:4 portrait crop */
 }
 .member__photo b {
   font-family: var(--f-urdu);

@@ -97,6 +97,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
 | Induction photo (the wings band) | `assets/induction.jpg`, referenced directly in `index.html` |
 | Council members + section bands | `BAYAAN.team` |
+| **Council photos** | drop files in `assets/team/` using the exact names in [`assets/team/README.txt`](assets/team/README.txt). Missing or broken files fall back to the بیان placeholder card, so you can add them one at a time |
 | Logo path | `BAYAAN.config.logo` |
 | Hero photo | `BAYAAN.config.heroPhoto` — the file lives at `assets/hero.jpg` ✅ *installed* |
 | The About group frame | it points at `assets/hero.jpg` directly, in `index.html` — replace the file and both it and the hero follow |

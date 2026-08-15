@@ -94,6 +94,14 @@ const Render = (() => {
         mi = 0;
         return `<div class="team__band" data-reveal="up"><span>${esc(m.band)}</span><i></i></div>`;
       }
+      /* The portrait sits over the بیان placeholder rather than replacing it, and
+         removes itself if the file is missing — so a half-finished set of photos
+         degrades card by card instead of leaving holes. */
+      const shot = m.photo
+        ? `<img class="member__shot" src="${esc(m.photo)}" alt="" loading="lazy"
+                decoding="async" onerror="this.remove()" />`
+        : '';
+
       return `
         <article class="member" style="--mi:${mi++}">
           <span class="member__curtain" aria-hidden="true"></span>
@@ -101,6 +109,7 @@ const Render = (() => {
             <img class="logo-img" src="${Logo.src}" alt="" />
             <b class="logo-fallback">بیان</b>
           </span>
+          ${shot}
           <p class="member__role">${esc(m.role)}</p>
           <p class="member__name">${esc(m.name)}</p>
         </article>`;

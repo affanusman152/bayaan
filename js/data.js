@@ -97,8 +97,8 @@ const BAYAAN = {
       title: "Harf se Harf Tak",
       ur: "حرف سے حرف تک",
       flagship: true,                                  // ← the main event; styled apart in the timeline
-      meta: ["Flagship", "Literary showcase"],
-      desc: "Our signature literary evening and the biggest thing Bayaan has staged — readings, performances and the year's best student writing on one stage."
+      meta: ["Flagship", "Declamation contest"],
+      desc: "A declamation contest at heart, and the biggest thing Bayaan has staged — Urdu and English tracks, one stage, a full house."
     },
     {
       year: "2026",
@@ -120,24 +120,6 @@ const BAYAAN = {
     },
     {
       year: "2025",
-      title: "Inter-Class Declamation",
-      meta: ["Competition", "Urdu & English"],
-      desc: "The entry point for most Bayaanis — first podium, first trophy, first standing ovation."
-    },
-    {
-      year: "2025",
-      title: "Bayaan Open Mic",
-      meta: ["Recurring", "Evening"],
-      desc: "No judges, no scorecards. Poetry, stand-up, or whatever you've been writing at 2am."
-    },
-    {
-      year: "2025",
-      title: "Speech & Delivery Workshop",
-      meta: ["Training", "Members"],
-      desc: "Breathing, structure, stagecraft — run by seniors before every competition season."
-    },
-    {
-      year: "2025",
       title: "General Body Meetup",
       meta: ["Society", "Kickoff"],
       desc: "Where the semester's calendar gets set and every wing pitches its plan."
@@ -147,21 +129,27 @@ const BAYAAN = {
   /* ── council ──────────────────────────────────────────
      NOTE: names below were transcribed from the council
      poster — please verify spellings before publishing.
+
+     PHOTOS: drop each file at exactly the `photo` path below
+     (folder `assets/team/`). Portrait crops work best — the
+     cards are 3:4 and framed on the upper part of the frame.
+     Any member without a file still renders: the card falls
+     back to the بیان placeholder, so half a set is fine.
      ─────────────────────────────────────────────────── */
   team: [
     { band: "Mentors" },
-    { role: "Mentor", name: "Ms. Saba Malghani" },
-    { role: "Mentor", name: "Ms. Mavy Christina" },
-    { role: "Mentor", name: "Adeel Ahmed Ghauman" },
+    { role: "Mentor", name: "Ms. Saba Malghani",   photo: "assets/team/saba-malghani.jpg" },
+    { role: "Mentor", name: "Ms. Mavy Christina",  photo: "assets/team/mavy-christina.jpg" },
+    { role: "Mentor", name: "Adeel Ahmed Ghauman", photo: "assets/team/adeel-ahmed-ghauman.jpg" },
 
     { band: "Executive Council '26" },
-    { role: "President",            name: "Affan Usman" },
-    { role: "Vice President",       name: "Ibrahim Idrees" },
-    { role: "Vice President",       name: "Zainab Tahir" },
-    { role: "General Secretary",    name: "Maryam Iqbal" },
-    { role: "Finance Secretary",    name: "Zainab bint-e-Asad" },
-    { role: "Information Secretary",name: "Mustafa Jaffery" },
-    { role: "Content Manager",      name: "Muhammad Idrees" },
+    { role: "President",            name: "Affan Usman",        photo: "assets/team/affan-usman.jpg" },
+    { role: "Vice President",       name: "Ibrahim Idrees",     photo: "assets/team/ibrahim-idrees.jpg" },
+    { role: "Vice President",       name: "Zainab Tahir",       photo: "assets/team/zainab-tahir.jpg" },
+    { role: "General Secretary",    name: "Maryam Iqbal",       photo: "assets/team/maryam-iqbal.jpg" },
+    { role: "Finance Secretary",    name: "Zainab bint-e-Asad", photo: "assets/team/zainab-bint-e-asad.jpg" },
+    { role: "Information Secretary",name: "Mustafa Jaffery",    photo: "assets/team/mustafa-jaffery.jpg" },
+    { role: "Content Manager",      name: "Muhammad Idrees",    photo: "assets/team/muhammad-idrees.jpg" },
     { role: "Join the council",     name: "Your name here" }
   ]
 };
