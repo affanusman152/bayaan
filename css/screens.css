@@ -128,10 +128,21 @@ body.has-hero .hero__fallback { display: none; }
   text-transform: uppercase;
   color: var(--gold);
 }
+/* The rule breathes out to 1.9x from its left edge, so its layout box reserves
+   the width it GROWS to, not the width it rests at. Scaling a 26px box was
+   pushing ~23px past a 9.6px flex gap and running the line under the first word. */
 .hero__eyebrow i {
-  width: 26px; height: 1px;
-  background: var(--gold);
+  position: relative;
   display: block;
+  width: 50px;              /* 26 x 1.9 = 49.4, so the growth stays inside the box */
+  height: 1px;
+}
+.hero__eyebrow i::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 26px;
+  background: var(--gold);
   transform-origin: left;
   animation: lineBreathe 3.2s var(--e-ink) infinite;
 }
