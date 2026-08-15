@@ -139,17 +139,16 @@ const BAYAAN = {
   team: [
     { band: "Mentors" },
     { role: "Mentor", name: "Ms. Saba Malghani",   photo: "assets/team/saba-malghani.jpg" },
-    { role: "Mentor", name: "Ms. Mavy Christina",  photo: "assets/team/mavy-christina.jpg" },
-    { role: "Mentor", name: "Adeel Ahmed Ghauman", photo: "assets/team/adeel-ahmed-ghauman.jpg" },
+    { role: "Mentor", name: "Ms. Mary Christina",  photo: "assets/team/mary-christina.jpg" },
+    { role: "Mentor", name: "Adeel Haider",        photo: "assets/team/adeel-haider.jpg" },
 
     { band: "Executive Council '26" },
     { role: "President",            name: "Affan Usman",        photo: "assets/team/affan-usman.jpg" },
-    { role: "Vice President",       name: "Ibrahim Idrees",     photo: "assets/team/ibrahim-idrees.jpg" },
-    { role: "Vice President",       name: "Zainab Tahir",       photo: "assets/team/zainab-tahir.jpg" },
+    { role: "Vice President",       name: "Ibrahim Khan",       photo: "assets/team/ibrahim-khan.jpg" },
+    { role: "Vice President",       name: "Zainab Tariq",       photo: "assets/team/zainab-tariq.jpg" },
     { role: "General Secretary",    name: "Maryam Iqbal",       photo: "assets/team/maryam-iqbal.jpg" },
     { role: "Finance Secretary",    name: "Zainab bint-e-Asad", photo: "assets/team/zainab-bint-e-asad.jpg" },
     { role: "Information Secretary",name: "Mustafa Jaffery",    photo: "assets/team/mustafa-jaffery.jpg" },
-    { role: "Content Manager",      name: "Muhammad Idrees",    photo: "assets/team/muhammad-idrees.jpg" },
-    { role: "Join the council",     name: "Your name here" }
+    { role: "Content Manager",      name: "Muhammad Tariq",     photo: "assets/team/muhammad-tariq.jpg" }
   ]
 };

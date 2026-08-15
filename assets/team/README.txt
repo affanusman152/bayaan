@@ -5,18 +5,18 @@ Save each person's photo here using EXACTLY the filename listed below.
 Nothing else needs editing — the cards pick them up automatically.
 
   Mentors
-    saba-malghani.jpg
-    mavy-christina.jpg
-    adeel-ahmed-ghauman.jpg
+    saba-malghani.jpg        (Ms. Saba Malghani)
+    mary-christina.jpg       (Ms. Mary Christina)
+    adeel-haider.jpg         (Adeel Haider)
 
   Executive Council '26
-    affan-usman.jpg
-    ibrahim-idrees.jpg
-    zainab-tahir.jpg
-    maryam-iqbal.jpg
-    zainab-bint-e-asad.jpg
-    mustafa-jaffery.jpg
-    muhammad-idrees.jpg
+    affan-usman.jpg          (Affan Usman — President)
+    ibrahim-khan.jpg         (Ibrahim Khan — Vice President)
+    zainab-tariq.jpg         (Zainab Tariq — Vice President)
+    maryam-iqbal.jpg         (Maryam Iqbal — General Secretary)
+    zainab-bint-e-asad.jpg   (Zainab bint-e-Asad — Finance Secretary)
+    mustafa-jaffery.jpg      (Mustafa Jaffery — Information Secretary)
+    muhammad-tariq.jpg       (Muhammad Tariq — Content Manager)
 
 What makes a good file here
 ---------------------------
