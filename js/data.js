@@ -16,8 +16,8 @@ const BAYAAN = {
        what protects the data (see supabase/schema.sql).
        Leave them blank and the join screen shows a 'not open yet'
        note instead of a broken form. */
-    supabaseUrl: "",                                   // ← https://xxxx.supabase.co
-    supabaseKey: "",                                   // ← the publishable / anon key
+    supabaseUrl: "https://rqmolxyuvuyuluzqmrbc.supabase.co",
+    supabaseKey: "sb_publishable_EXNXOAzJkfUGrR4owSxdtA_VVld_A4u",
 
     instagram:   "https://instagram.com/bayaan_fast",
     introMs:     820                                   // how long the curtain seal holds
