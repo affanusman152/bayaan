@@ -1,0 +1,244 @@
+/* ══════════════ ADMIN — registrations board ══════════════
+   A tool, not a page. It borrows the palette from tokens.css so it feels like
+   Bayaan, but stays dense and plain: no grain, no curtain, no reveals. Council
+   members are here to read a list, not to be shown a website. ────────────── */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .88em;
+  padding: .1em .35em;
+  border-radius: 4px;
+  background: rgba(246,214,138,.1);
+  color: var(--gold-lite);
+}
+
+/* ── top bar ── */
+.ad__bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem clamp(.9rem, 3vw, 1.6rem);
+  background: rgba(10,6,7,.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.ad__brand { display: flex; align-items: center; gap: .7rem; }
+.ad__brand:hover { text-decoration: none; }
+.ad__brand img { width: 30px; height: 30px; object-fit: contain; }
+.ad__brand span { display: grid; line-height: 1.1; }
+.ad__brand b {
+  font-family: var(--f-display);
+  letter-spacing: .22em;
+  font-size: .95rem;
+  color: var(--cream);
+}
+.ad__brand i {
+  font-style: normal;
+  font-size: .64rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ad__who { display: flex; align-items: center; gap: .8rem; font-size: .8rem; color: var(--cream-dim); }
+
+/* ── buttons ── */
+.ad__btn {
+  font-family: var(--f-display);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: .78rem;
+  padding: .58rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold) 50%, var(--gold-lite));
+  color: var(--ink);
+  transition: filter .25s, opacity .25s;
+}
+.ad__btn:hover { filter: brightness(1.1); }
+.ad__btn:disabled { opacity: .55; cursor: progress; }
+.ad__btn--ghost {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--cream);
+}
+.ad__btn--ghost:hover { background: rgba(124,15,20,.35); }
+
+/* ── panels (setup + sign-in) ── */
+.ad__panel {
+  max-width: 27rem;
+  margin: clamp(2rem, 10vh, 5rem) auto;
+  padding: 1.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: linear-gradient(170deg, rgba(124,15,20,.28), rgba(20,11,12,.85));
+}
+.ad__panel h1 {
+  font-family: var(--f-display);
+  font-size: 1.5rem;
+  letter-spacing: .06em;
+  color: var(--cream);
+  margin-bottom: .5rem;
+}
+.ad__muted { font-size: .84rem; color: var(--cream-dim); line-height: 1.55; }
+
+.ad__login { display: grid; gap: .9rem; }
+.ad__login label {
+  display: grid;
+  gap: .3rem;
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ad__login input {
+  padding: .7rem .85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(10,6,7,.6);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: .95rem;
+}
+.ad__login input:focus {
+  outline: none;
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(227,167,47,.15);
+}
+.ad__err { font-size: .82rem; color: #E8737A; min-height: 1em; }
+
+/* ── board ── */
+.ad__board { padding: 1rem clamp(.6rem, 2.5vw, 1.6rem) 3rem; }
+
+.ad__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .9rem;
+}
+.ad__search, .ad__filter {
+  padding: .55rem .8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(10,6,7,.6);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: .88rem;
+}
+.ad__search { flex: 1 1 15rem; min-width: 0; }
+.ad__search:focus, .ad__filter:focus { outline: none; border-color: var(--gold-deep); }
+.ad__count {
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* the table scrolls inside its own box — the page itself never scrolls sideways */
+.ad__wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: rgba(20,11,12,.5);
+}
+.ad__table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.ad__table th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  padding: .7rem .8rem;
+  font-family: var(--f-display);
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: rgba(10,6,7,.96);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.ad__table td {
+  padding: .7rem .8rem;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+.ad__row:hover { background: rgba(124,15,20,.16); }
+.ad__dim { color: var(--muted); font-size: .8rem; }
+.ad__mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--cream-dim); }
+
+.ad__more {
+  width: 24px; height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: .95rem;
+  line-height: 1;
+}
+.ad__more:hover { background: rgba(227,167,47,.14); }
+
+.ad__tag {
+  display: inline-block;
+  margin: 0 .25rem .25rem 0;
+  padding: .16rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: .66rem;
+  letter-spacing: .08em;
+  color: var(--gold-lite);
+  white-space: nowrap;
+}
+
+.ad__st {
+  padding: .35rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(10,6,7,.7);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: .74rem;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.ad__st:focus { outline: none; border-color: var(--gold); }
+.ad__st--new         { color: var(--cream-dim); }
+.ad__st--shortlisted { color: var(--gold-lite);  border-color: var(--gold-deep); }
+.ad__st--accepted    { color: #7BD88F;           border-color: rgba(123,216,143,.5); }
+.ad__st--rejected    { color: #E8737A;           border-color: rgba(232,115,122,.45); }
+
+.ad__detail td { background: rgba(10,6,7,.6); }
+.ad__detail-grid { display: grid; gap: 1rem; }
+@media (min-width: 700px) { .ad__detail-grid { grid-template-columns: 1fr 1fr; } }
+.ad__detail-grid h4 {
+  font-family: var(--f-display);
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: .3rem;
+}
+.ad__detail-grid p { color: var(--cream-dim); font-size: .86rem; line-height: 1.6; white-space: pre-wrap; }
+
+.ad__note { margin-top: .9rem; font-size: .84rem; color: var(--muted); line-height: 1.55; }
+
+/* same trap as the main site: .ad__who is a flex row, which beat `hidden` and
+   left "Sign out" on screen while signed out */
+[hidden] { display: none !important; }

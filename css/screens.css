@@ -1066,3 +1066,152 @@ body.has-hero .hero__fallback { display: none; }
   .hero__cta     { margin-top: 2rem; }
   .hero__stats   { margin-top: 2.8rem; padding-top: 1.6rem; }
 }
+
+/* ─────────────── REGISTRATION FORM ─────────────── */
+.reg {
+  width: 100%;
+  display: grid;
+  gap: 1.5rem;
+  text-align: left;
+  margin-top: .6rem;
+}
+.reg__grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 640px) { .reg__grid { grid-template-columns: 1fr 1fr; } }
+
+.fld { display: grid; gap: .4rem; }
+.fld__label {
+  font-family: var(--f-display);
+  font-size: .82rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.fld__label i { font-style: normal; color: var(--maroon-hot); }
+
+.fld__in {
+  width: 100%;
+  padding: .85rem 1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: rgba(10,6,7,.55);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: var(--t-base);
+  transition: border-color .3s, background .3s, box-shadow .3s;
+}
+.fld__in::placeholder { color: rgba(142,127,116,.7); }
+.fld__in:focus {
+  outline: none;
+  border-color: var(--gold-deep);
+  background: rgba(10,6,7,.8);
+  box-shadow: 0 0 0 3px rgba(227,167,47,.14);
+}
+.fld__in--area { resize: vertical; min-height: 5.4rem; line-height: 1.55; }
+.fld__in.is-bad { border-color: var(--maroon-hot); }
+
+.fld__err {
+  font-style: normal;
+  font-size: var(--t-xs);
+  color: #E8737A;
+  min-height: 1em;
+}
+
+/* ── wing picker ── */
+.reg__wings { border: 0; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.reg__wings legend {
+  padding: 0;
+  font-family: var(--f-display);
+  font-size: .82rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.reg__wings legend i { font-style: normal; color: var(--maroon-hot); }
+.reg__hint { font-size: var(--t-xs); color: var(--muted); }
+
+.wingpick { display: grid; gap: .5rem; }
+@media (min-width: 560px) { .wingpick { grid-template-columns: 1fr 1fr; } }
+
+.wingpick__opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .8rem .95rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(10,6,7,.4);
+  cursor: pointer;
+  transition: border-color .3s, background .3s;
+}
+.wingpick__opt input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+.wingpick__box {
+  flex: none;
+  width: 18px; height: 18px;
+  border: 1px solid var(--gold-deep);
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  transition: background .3s, border-color .3s;
+}
+.wingpick__box::after {
+  content: "";
+  width: 9px; height: 5px;
+  border-left: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: rotate(-45deg) scale(0);
+  transition: transform .3s var(--e-spring);
+}
+.wingpick__name { font-size: var(--t-sm); color: var(--cream); }
+.wingpick__ur {
+  margin-left: auto;
+  font-family: var(--f-urdu);
+  font-size: 1rem;
+  line-height: 2;
+  color: var(--gold-lite);
+  opacity: .75;
+  direction: rtl;
+}
+.wingpick__opt:hover { border-color: var(--line); background: rgba(124,15,20,.22); }
+.wingpick__opt:has(input:checked) { border-color: var(--gold-deep); background: rgba(124,15,20,.34); }
+.wingpick__opt:has(input:checked) .wingpick__box { background: var(--gold); border-color: var(--gold); }
+.wingpick__opt:has(input:checked) .wingpick__box::after { transform: rotate(-45deg) scale(1); }
+.wingpick__opt:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(227,167,47,.18); }
+
+/* the honeypot — off-screen rather than display:none, which some bots skip */
+.reg__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px; height: 1px;
+  overflow: hidden;
+}
+
+.reg__send { justify-self: center; }
+.reg__send:disabled { opacity: .6; cursor: progress; }
+
+.reg__status { text-align: center; font-size: var(--t-sm); color: var(--cream-dim); min-height: 1.2em; }
+.reg__status.is-bad { color: #E8737A; }
+
+/* the panel shown before the form opens, and after a successful send */
+.reg__shut {
+  padding: 1.8rem 1.4rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  text-align: center;
+  background: rgba(124,15,20,.14);
+}
+.reg__shut-head {
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  letter-spacing: .06em;
+  color: var(--gold-lite);
+}
+.reg__shut-note { margin-top: .4rem; font-size: var(--t-sm); color: var(--cream-dim); }
+.reg__shut-note a { color: var(--gold); border-bottom: 1px solid var(--line); }

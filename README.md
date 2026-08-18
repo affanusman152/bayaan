@@ -91,7 +91,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 
 | Want to change | Edit |
 |---|---|
-| Registration form link | `BAYAAN.config.joinFormUrl` |
+| Registration form | it posts to Supabase — see **Registrations** below |
 | Ticker couplets | `BAYAAN.ticker` |
 | Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
@@ -120,17 +120,23 @@ its internal geometry.
 
 ```
 index.html          all six screens, in order
+admin.html          the registrations board (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
+supabase/schema.sql the tables and row-level-security rules — run this once
 css/tokens.css      colour · type · spacing · easing curves
 css/base.css        reset + grain/vignette/aura ambience
 css/logo.css        every placement of the mark, in one file
 css/ui.css          top bar · drawer · curtain · buttons · ticker
-css/screens.css     hero · about · wings · ventures · team · join  (+ the ≥720px pass)
+css/screens.css     hero · about · wings · ventures · team · join · form
 css/motion.css      reveal utilities + screen enter/exit
-js/data.js          ← content lives here
+css/admin.css       the board — dense and plain, palette only
+js/data.js          ← content lives here, plus the two Supabase values
 js/logo.js          loads the mark, keys out the black, fits it to the mask
-js/motion.js        reveal engine, counters, parallax, magnetics, rail dots
+js/motion.js        reveal engine, counters, parallax, magnetics
 js/render.js        data → DOM
+js/supabase.js      ~60 lines of fetch — no SDK, no build step
+js/join.js          the registration form
+js/admin.js         sign-in, the table, triage, CSV export
 js/drawer.js        drawer + focus trap + swipe gestures
 js/router.js        hash routing + the curtain transition
 js/intro.js         the intro — reuses the router's curtain
@@ -139,6 +145,76 @@ js/app.js           boot order
 
 Routes: `#/home` `#/about` `#/wings` `#/ventures` `#/team` `#/join` — deep-linkable,
 back button works, and ← / → arrow keys walk between screens.
+
+## Registrations
+
+The join screen is a real form that writes to Supabase, and `admin.html` is the board
+the council reads it on. No SDK and no build step — Supabase is plain REST, so
+`js/supabase.js` is about sixty lines of `fetch`.
+
+**Until you do the three steps below, nothing is broken:** the join screen shows a
+"registrations aren't open through the site yet" panel instead of a form, and the admin
+page says it is not connected. That is the unconfigured state, not a bug.
+
+### 1 — Run the schema
+Paste all of `supabase/schema.sql` into the Supabase SQL editor and run it. It creates
+`registrations`, an `admins` table, and the row-level-security policies. Safe to re-run.
+
+### 2 — Paste two values into `js/data.js`
+From **Project Settings → Data API**:
+
+```js
+supabaseUrl: "https://xxxx.supabase.co",
+supabaseKey: "…the publishable / anon key…",
+```
+
+The publishable key is **meant** to be public — it names the project, it does not
+authorise anything. Row-level security is the actual lock. Never paste a
+**service-role** key here; that one really is a master key, and this repo is public.
+
+### 3 — Make yourself an admin
+Authentication → Users → add your account, then run:
+
+```sql
+insert into public.admins (user_id, email) values ('THE-USER-UID', 'you@example.com');
+```
+
+**Also turn off "Allow new users to sign up"** (Authentication → Sign In / Providers).
+Being signed in is deliberately not enough to read submissions — an account also has to
+be listed in `admins` — but leaving public sign-up on is still a door worth shutting.
+
+### What the rules actually enforce
+
+| Who | Can |
+|---|---|
+| Anyone (the public form) | insert a registration, and nothing else |
+| A signed-in account **not** in `admins` | nothing — reads come back as an empty list |
+| A signed-in account **in** `admins` | read every submission, set `status` and `notes` |
+| Anyone at all | **cannot delete** — there is no delete policy and no delete grant |
+
+The public form physically cannot write `status` or `notes`: those columns are left out
+of the column-level `grant insert`, so an applicant cannot mark themselves accepted.
+One registration per roll number is enforced by a unique index, and the form turns the
+resulting 409 into a readable sentence rather than a stack trace.
+
+### The admin board — `/admin.html`
+Sign in, then search, filter by status, expand a row for the long answers, change
+someone's status inline, or export the current view to CSV. It is `noindex` and is not
+linked from the site — though that is tidiness, not security. The database is what
+refuses strangers.
+
+CSV cells that begin with `=`, `+`, `-` or `@` are prefixed with an apostrophe on export,
+because Excel and Sheets execute those as formulas — a real attack route through any
+public form.
+
+### Known limits, stated plainly
+* **Spam.** There is a honeypot field and the one-per-roll-number rule, but no true rate
+  limiting — that needs an edge function. Fine for a campus induction; not fine for a
+  form left open to the whole internet for months.
+* **Client-side validation is courtesy, not security.** Anyone can POST straight past
+  `js/join.js`. Every rule is also a database constraint, and that is the one that counts.
+* **Applicants' phone numbers and emails are personal data.** Only add people to `admins`
+  who should see them, and prefer CSV exports over screenshots in group chats.
 
 ## Deploying
 It's a static site. Drag the folder onto Netlify, or push to GitHub and turn on Pages.

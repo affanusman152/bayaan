@@ -107,3 +107,8 @@ code {
     transition-duration: .01ms !important;
   }
 }
+
+/* The `hidden` attribute only carries `display: none` from the UA sheet, so any
+   rule that sets display — .reg is a grid, for one — silently overrides it and
+   shows the element anyway. This makes hidden mean hidden, everywhere. */
+[hidden] { display: none !important; }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Registrations — Bayaan</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+<header class="ad__bar">
+  <a class="ad__brand" href="index.html">
+    <img src="assets/logo.png" alt="" />
+    <span><b>BAYAAN</b><i>Registrations</i></span>
+  </a>
+  <div class="ad__who" id="adWho" hidden>
+    <span id="adEmail"></span>
+    <button class="ad__btn ad__btn--ghost" id="adOut" type="button">Sign out</button>
+  </div>
+</header>
+
+<!-- shown when js/data.js has no Supabase project yet -->
+<main class="ad__panel" id="adSetup" hidden>
+  <h1>Not connected yet</h1>
+  <p class="ad__muted">
+    Add <code>supabaseUrl</code> and <code>supabaseKey</code> to <code>js/data.js</code>,
+    and run <code>supabase/schema.sql</code> in the Supabase SQL editor. The steps are
+    in the README under <b>Registrations</b>.
+  </p>
+</main>
+
+<!-- sign in -->
+<main class="ad__panel" id="adGate" hidden>
+  <form class="ad__login" id="adLogin">
+    <h1>Council sign-in</h1>
+    <p class="ad__muted">
+      Only accounts listed in the <code>admins</code> table can read submissions.
+      Signing in is not enough on its own.
+    </p>
+    <label>Email
+      <input type="email" id="adUser" required autocomplete="username" />
+    </label>
+    <label>Password
+      <input type="password" id="adPass" required autocomplete="current-password" />
+    </label>
+    <button class="ad__btn" type="submit" id="adGo">Sign in</button>
+    <p class="ad__err" id="adErr" role="alert"></p>
+  </form>
+</main>
+
+<!-- the board -->
+<main class="ad__board" id="adBoard" hidden>
+  <div class="ad__tools">
+    <input class="ad__search" id="adSearch" type="search" placeholder="Search name, roll, email, wing…" />
+    <select class="ad__filter" id="adStatus">
+      <option value="">All statuses</option>
+      <option value="new">New</option>
+      <option value="shortlisted">Shortlisted</option>
+      <option value="accepted">Accepted</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <span class="ad__count" id="adCount"></span>
+    <button class="ad__btn ad__btn--ghost" id="adRefresh" type="button">Refresh</button>
+    <button class="ad__btn ad__btn--ghost" id="adCsv" type="button">Export CSV</button>
+  </div>
+
+  <div class="ad__wrap">
+    <table class="ad__table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Received</th>
+          <th>Name</th>
+          <th>Roll</th>
+          <th>Contact</th>
+          <th>Batch / Dept</th>
+          <th>Wings</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="adRows"></tbody>
+    </table>
+  </div>
+
+  <p class="ad__note" id="adNote"></p>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

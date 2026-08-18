@@ -117,11 +117,7 @@ const Render = (() => {
   }
 
   function join() {
-    const btn = document.getElementById('joinBtn');
-    if (btn) {
-      btn.href = BAYAAN.config.joinFormUrl;
-      if (BAYAAN.config.joinFormUrl === '#') btn.removeAttribute('target');
-    }
+    // the registration form itself is wired up in js/join.js
     const y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
   }

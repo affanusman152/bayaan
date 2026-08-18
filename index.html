@@ -301,12 +301,89 @@
         <li data-reveal="up" style="--d:2"><b>03</b><span>Show up. That's genuinely it.</span></li>
       </ol>
 
-      <a class="btn btn--gold btn--lg" id="joinBtn" href="#" target="_blank" rel="noopener" data-magnetic>
-        <span>Open registration form</span>
-      </a>
-      <p class="join__note" data-reveal="up" style="--d:4">
-        Placeholder link — drop the real Google Form URL in <code>js/data.js</code>.
-      </p>
+      <!-- registrations: posts straight to Supabase, see js/join.js -->
+      <form class="reg" id="regForm" novalidate hidden>
+        <div class="reg__grid">
+          <label class="fld">
+            <span class="fld__label">Full name <i>*</i></span>
+            <input class="fld__in" name="full_name" type="text" required maxlength="80" autocomplete="name" />
+            <em class="fld__err"></em>
+          </label>
+
+          <label class="fld">
+            <span class="fld__label">Roll number <i>*</i></span>
+            <input class="fld__in" name="roll_no" type="text" required maxlength="24" placeholder="25M-0524" />
+            <em class="fld__err"></em>
+          </label>
+
+          <label class="fld">
+            <span class="fld__label">Email <i>*</i></span>
+            <input class="fld__in" name="email" type="email" required maxlength="120" autocomplete="email" />
+            <em class="fld__err"></em>
+          </label>
+
+          <label class="fld">
+            <span class="fld__label">WhatsApp number <i>*</i></span>
+            <input class="fld__in" name="phone" type="tel" required maxlength="24" placeholder="03xx-xxxxxxx" autocomplete="tel" />
+            <em class="fld__err"></em>
+          </label>
+
+          <label class="fld">
+            <span class="fld__label">Batch / semester</span>
+            <input class="fld__in" name="batch" type="text" maxlength="40" placeholder="Fall 2026 · 1st" />
+            <em class="fld__err"></em>
+          </label>
+
+          <label class="fld">
+            <span class="fld__label">Department</span>
+            <input class="fld__in" name="department" type="text" maxlength="60" placeholder="Computer Science" />
+            <em class="fld__err"></em>
+          </label>
+        </div>
+
+        <fieldset class="reg__wings">
+          <legend>Which wings interest you? <i>*</i></legend>
+          <p class="reg__hint">Pick as many as you like — most Bayaanis belong to more than one.</p>
+          <div class="wingpick" id="wingPick"></div>
+          <em class="fld__err" id="wingsErr"></em>
+        </fieldset>
+
+        <label class="fld">
+          <span class="fld__label">Done any of this before?</span>
+          <textarea class="fld__in fld__in--area" name="experience" rows="3" maxlength="800"
+                    placeholder="Debates, declamations, theatre, writing — school counts. Blank is a perfectly good answer."></textarea>
+          <em class="fld__err"></em>
+        </label>
+
+        <label class="fld">
+          <span class="fld__label">Why Bayaan?</span>
+          <textarea class="fld__in fld__in--area" name="why" rows="3" maxlength="800"
+                    placeholder="A line or two is plenty."></textarea>
+          <em class="fld__err"></em>
+        </label>
+
+        <!-- honeypot: real people never see this, bots fill it in -->
+        <div class="reg__trap" aria-hidden="true">
+          <label>Leave this field empty
+            <input name="website" type="text" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+
+        <button class="btn btn--gold btn--lg reg__send" type="submit" id="regSend" data-magnetic>
+          <span>Send my registration</span>
+        </button>
+
+        <p class="reg__status" id="regStatus" role="status" aria-live="polite"></p>
+      </form>
+
+      <!-- shown instead of the form until Supabase is configured in js/data.js -->
+      <div class="reg__shut" id="regShut" hidden>
+        <p class="reg__shut-head">Registrations aren't open through the site yet.</p>
+        <p class="reg__shut-note">
+          Catch us on <a href="https://instagram.com/bayaan_fast" target="_blank" rel="noopener">Instagram</a>
+          — the form goes live here the moment inductions open.
+        </p>
+      </div>
 
       <footer class="foot">
         <p class="foot__ur">حرف سے حرف تک</p>
@@ -318,12 +395,14 @@
 </main>
 
 <script src="js/data.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/logo.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/render.js"></script>
 <script src="js/drawer.js"></script>
 <script src="js/router.js"></script>
 <script src="js/intro.js"></script>
+<script src="js/join.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

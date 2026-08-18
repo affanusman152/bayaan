@@ -10,7 +10,15 @@ const BAYAAN = {
   config: {
     logo:        "assets/logo.png",                    // ← the artwork, black background is fine
     heroPhoto:   "assets/hero.jpg",                    // ← wide group shot; falls back to a maroon panel
-    joinFormUrl: "#",                                  // ← paste the Google Form link
+    /* ── registrations ──────────────────────────────────
+       Paste these two from Supabase → Project Settings → Data API.
+       The publishable key is public by design; row-level security is
+       what protects the data (see supabase/schema.sql).
+       Leave them blank and the join screen shows a 'not open yet'
+       note instead of a broken form. */
+    supabaseUrl: "",                                   // ← https://xxxx.supabase.co
+    supabaseKey: "",                                   // ← the publishable / anon key
+
     instagram:   "https://instagram.com/bayaan_fast",
     introMs:     820                                   // how long the curtain seal holds
   },

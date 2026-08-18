@@ -16,6 +16,9 @@
   // 1 — content into the DOM before anything observes it
   Render.all();
 
+  // 1b — the registration form (no-ops unless Supabase is configured)
+  Join.init();
+
   // 2 — chrome
   Drawer.init();
   Router.init();
