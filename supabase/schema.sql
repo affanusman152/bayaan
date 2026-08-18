@@ -22,10 +22,24 @@ create table if not exists public.admins (
 
 alter table public.admins enable row level security;
 
+-- A policy on `admins` cannot query `admins` in its own USING clause — Postgres
+-- detects that as infinite recursion. This security-definer function runs as
+-- the table owner (which bypasses RLS), so it can check membership without
+-- retriggering the policy that calls it.
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (select 1 from public.admins where user_id = auth.uid());
+$$;
+
 drop policy if exists "admins may see the admin list" on public.admins;
 create policy "admins may see the admin list"
   on public.admins for select to authenticated
-  using (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+  using (public.is_admin());
 
 -- ─────────────────────────────────────────────────────────────────────
 --  THE REGISTRATIONS
@@ -98,13 +112,13 @@ create policy "anyone may register"
 drop policy if exists "admins may read registrations" on public.registrations;
 create policy "admins may read registrations"
   on public.registrations for select to authenticated
-  using (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+  using (public.is_admin());
 
 drop policy if exists "admins may triage registrations" on public.registrations;
 create policy "admins may triage registrations"
   on public.registrations for update to authenticated
-  using      (exists (select 1 from public.admins a where a.user_id = auth.uid()))
-  with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+  using      (public.is_admin())
+  with check (public.is_admin());
 
 -- There is deliberately NO delete policy and no delete grant, so nothing can
 -- destroy a submission through the API. Delete from the Supabase dashboard if
