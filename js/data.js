@@ -157,6 +157,7 @@ const BAYAAN = {
     { role: "General Secretary",    name: "Maryam Iqbal",       photo: "assets/team/maryam-iqbal.jpg" },
     { role: "Finance Secretary",    name: "Zainab bint-e-Asad", photo: "assets/team/zainab-bint-e-asad.jpg" },
     { role: "Information Secretary",name: "Mustafa Jaffery",    photo: "assets/team/mustafa-jaffery.jpg" },
-    { role: "Content Manager",      name: "Muhammad Tariq",     photo: "assets/team/muhammad-tariq.jpg" }
+    { role: "Content Manager",      name: "Muhammad Tariq",     photo: "assets/team/muhammad-tariq.jpg" },
+    { role: "Event Head",           name: "M Umais",            photo: "assets/team/m-umais.jpg" }
   ]
 };

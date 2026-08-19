@@ -17,6 +17,7 @@ Nothing else needs editing — the cards pick them up automatically.
     zainab-bint-e-asad.jpg   (Zainab bint-e-Asad — Finance Secretary)
     mustafa-jaffery.jpg      (Mustafa Jaffery — Information Secretary)
     muhammad-tariq.jpg       (Muhammad Tariq — Content Manager)
+    m-umais.jpg              (M Umais — Event Head)
 
 What makes a good file here
 ---------------------------
