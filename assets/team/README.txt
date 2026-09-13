@@ -12,11 +12,13 @@ Nothing else needs editing — the cards pick them up automatically.
   Executive Council '26
     affan-usman.jpg          (Affan Usman — President)
     ibrahim-khan.jpg         (Ibrahim Khan — Vice President)
-    zainab-tariq.jpg         (Zainab Tariq — Vice President)
-    maryam-iqbal.jpg         (Maryam Iqbal — General Secretary)
+    maryam-iqbal.jpg         (Maryam Iqbal — Vice President)
+    irtiza.jpg               (Irtiza — General Secretary)
     zainab-bint-e-asad.jpg   (Zainab bint-e-Asad — Finance Secretary)
-    mustafa-jaffery.jpg      (Mustafa Jaffery — Information Secretary)
+    haiqa-imran.jpg          (Haiqa Imran — Information Secretary)
     muhammad-tariq.jpg       (Muhammad Tariq — Content Manager)
+    mahnoor.jpg              (Mahnoor — Media Head)
+    alishba.jpg              (Alishba — Decor Head)
     m-umais.jpg              (M Umais — Event Head)
 
 What makes a good file here
