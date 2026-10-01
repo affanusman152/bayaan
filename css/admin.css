@@ -127,6 +127,50 @@ code {
 /* ── board ── */
 .ad__board { padding: 1rem clamp(.6rem, 2.5vw, 1.6rem) 3rem; }
 
+/* ── broadcast tab ── */
+.ad__cast { display: grid; gap: 1.4rem; max-width: 52rem; }
+.ad__castform {
+  display: grid;
+  gap: .9rem;
+  padding: 1.2rem clamp(.9rem, 3vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: rgba(20,11,12,.5);
+}
+.ad__castform h2 { font-family: var(--f-display); font-size: 1.5rem; letter-spacing: .06em; color: var(--cream); }
+.ad__castform label { display: grid; gap: .35rem; font-size: .8rem; color: var(--cream-dim); }
+.ad__castform select, .ad__castform input[type=text], .ad__castform textarea {
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(10,6,7,.7);
+  color: var(--cream);
+  font-family: var(--f-body);
+  font-size: .92rem;
+}
+.ad__castform textarea { resize: vertical; line-height: 1.5; }
+.ad__castform select:focus, .ad__castform input:focus, .ad__castform textarea:focus {
+  outline: none; border-color: var(--gold-deep); box-shadow: 0 0 0 3px rgba(227,167,47,.15);
+}
+.ad__kind { display: flex; flex-wrap: wrap; gap: .6rem; }
+.ad__kind label {
+  display: flex; align-items: center; gap: .55rem;
+  padding: .55rem .8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.ad__kind label:has(input:checked) { border-color: var(--gold-deep); background: rgba(124,15,20,.34); color: var(--cream); }
+.ad__kind small { color: var(--muted); }
+.ad__recips { font-size: .86rem; color: var(--gold-lite); }
+.ad__castbtns { display: flex; flex-wrap: wrap; gap: .6rem; }
+.ad__ok { font-size: .85rem; color: #7BD88F; min-height: 1em; }
+.ad__subhead {
+  font-family: var(--f-display); font-size: .9rem; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--gold-deep);
+}
+
 .ad__tabs { display: flex; gap: .4rem; margin-bottom: .9rem; }
 .ad__tab {
   padding: .5rem 1.1rem;

@@ -121,17 +121,18 @@ its internal geometry.
 
 ```
 index.html          all six screens, in order
-admin.html          the registrations board — Induction + Events tabs (noindex, not linked from the site)
+admin.html          the registrations board — Induction, Events and Broadcast tabs (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
 supabase/schema.sql the induction tables and row-level-security rules — run this once
 supabase/events.sql the event-registration table + private screenshot bucket — run after schema.sql
+supabase/broadcasts.sql the broadcast queue + per-person delivery log — run after events.sql
 css/tokens.css      colour · type · spacing · easing curves
 css/base.css        reset + grain/vignette/aura ambience
 css/logo.css        every placement of the mark, in one file
 css/ui.css          top bar · drawer · curtain · buttons · ticker
 css/screens.css     hero · about · wings · ventures · team · join · form
 css/motion.css      reveal utilities + screen enter/exit
-automation/confirmation-emails.gs  Google Apps Script (runs on Google, not on the site) — emails verified registrants
+automation/confirmation-emails.gs  Google Apps Script (runs on Google, not on the site) — confirmations, announcements, certificates
 css/events.css      the event popup and its "Register" pill
 css/admin.css       the board — dense and plain, palette only
 js/data.js          ← content lives here, plus the two Supabase values
@@ -141,7 +142,7 @@ js/render.js        data → DOM
 js/supabase.js      ~80 lines of fetch (REST + storage) — no SDK, no build step
 js/join.js          the induction registration form
 js/events.js        the event popup: auto-open, validation, screenshot upload, submit
-js/admin.js         sign-in, both tables (Induction / Events), triage, screenshot viewer, CSV export
+js/admin.js         sign-in, both tables (Induction / Events), triage, screenshot viewer, CSV export, the Broadcast tab
 js/drawer.js        drawer + focus trap + swipe gestures
 js/router.js        hash routing + the curtain transition
 js/intro.js         the intro — reuses the router's curtain
@@ -250,12 +251,10 @@ popup and in the confirmation email.
 nobody can pay yet — fill `pay.account` (and `method`, `title`, `fee`) in as soon as you
 have them.
 
-**Planned, not built:** a "thank you — verification in progress" email on submission; an
-admin-panel **broadcast** button (e.g. "come to Room B-12") that queues a message the
-Apps Script mails to every verified registrant of an event; and **certificates** (a Slides
-template filled per person, attached as PDF) sent to **all verified** registrants after the
-event. The certificate rule decided 2026-10-01: everyone verified gets one — no attendance
-tracking.
+**Still not built:** a "thank you — verification in progress" email sent the moment someone
+submits. (Held back on purpose: the public form can name any address, so an automatic
+acknowledgement could be abused to make the society's Gmail mail strangers — it needs a
+quota guard first.)
 
 ### What the rules enforce
 | Who | Can |
@@ -274,41 +273,83 @@ Open the **Events** tab, click **View screenshot**, compare it with the account 
 then set the row's status to `verified` (or `rejected`). Moving to `verified` stamps
 `verified_at` automatically. `confirmation_sent_at` is reserved for the email automation.
 
-### Confirmation emails — a free Google Apps Script
+### Emails — a free Google Apps Script
 `automation/confirmation-emails.gs` is **not part of the website**. It runs on Google's
-servers under the society's Gmail, and the copy in the repo is for versioning and
-reference. Every 5 minutes it fetches rows that are `verified` but have no
-`confirmation_sent_at`, emails each student from that Gmail, then stamps the row. Polling
-means a missed run just catches up; the stamp is guarded (`is.null`) so nobody is emailed
-twice. There is no n8n and no server — it was dropped as an unaffordable extra.
+servers under the society's Gmail; the copy in the repo is for versioning and reference
+(**every time it changes, paste the new version into Apps Script again** and re-fill the
+`EVENTS` block). One job, `tick`, runs every 5 minutes and does two things:
+
+1. **Confirmations.** Rows marked `verified` with no `confirmation_sent_at` get a
+   "Registration successful" email (it lists the sessions, date and venue from `EVENTS`),
+   then the row is stamped so nobody is emailed twice.
+2. **Broadcasts.** Anything queued from the admin board's **Broadcast** tab (below).
+
+Polling means a missed run just catches up. There is no n8n and no server.
 
 **Setup (≈10 min, free, done once):**
-1. Sign in to the society Gmail → <https://script.google.com> → **New project** → paste in
-   the whole of `automation/confirmation-emails.gs`.
+1. Sign in to the society Gmail → <https://script.google.com> → your project → paste the
+   whole of `automation/confirmation-emails.gs` over `Code.gs`, **at the top level** — not
+   inside the `function myFunction() { … }` a new project starts with.
 2. Edit the `EVENTS` block at the top (date, venue, notes — blank lines are left out).
-3. ⚙ **Project Settings → Script Properties** → add `SUPABASE_URL`
-   (`https://rqmolxyuvuyuluzqmrbc.supabase.co`) and `SUPABASE_SERVICE_KEY` (Supabase →
-   Project Settings → API → **service_role**). ⚠️ That key is a master key: it lives only
-   here, never in the repo, the site, or a chat. Rotate it in Supabase if it ever leaks.
-4. In the editor pick `checkConnection` → **Run**. Approve the permissions (Advanced → "Go
-   to … (unsafe)" is normal for your own script). It should report the Gmail quota and how
-   many verified rows are waiting.
-5. Run `testEmail` — sends a sample of each event's email to *you only*.
-6. Run `installTrigger` — starts the 5-minute timer. `removeTrigger` stops it.
+3. ⚙ **Project Settings → Script Properties** → add `SUPABASE_URL` — the **API** address
+   `https://rqmolxyuvuyuluzqmrbc.supabase.co`, *not* the dashboard link — and
+   `SUPABASE_SERVICE_KEY` (Supabase → Project Settings → API Keys → a **secret** key).
+   ⚠️ That key is a master key: it lives only here, never in the repo, the site, a chat or a
+   screenshot. Rotate it in Supabase if it ever leaks.
+4. Pick `checkConnection` → **Run**. Approve the permissions (Advanced → "Go to … (unsafe)"
+   is normal for your own script; you are asked again whenever the script starts using a
+   new Google service). It reports the Gmail quota, how many verified rows are waiting, and
+   whether the timer is installed.
+5. Run `testEmail` — sends a sample confirmation of each event to *you only*.
+6. Run `installTrigger` **once**. That is what makes it run by itself — without it nothing
+   is ever sent. **No "Deploy" is needed** (that is only for web apps). `removeTrigger`
+   switches it off. If a verified registration is not emailed, `checkConnection` saying
+   "Timer: NOT installed" is the first thing to look for; the ⏰ Triggers page and the
+   ▶ Executions page in Apps Script show every run and any error.
 
 **Limits:** Apps Script caps how many emails a Google account can send per day, and
-`checkConnection` prints what is left (the society account showed **1500** on
-2026-10-01; plain consumer accounts have historically been nearer 100, so trust that
-printout, not this number). The script checks the remaining quota before every email
-and stops cleanly, resuming the next day. If you ever outgrow it, Brevo's free tier
-(300/day, no domain needed) is the next step.
+`checkConnection` prints what is left (the society account showed **1500** on 2026-10-01;
+plain consumer accounts have historically been nearer 100, so trust that printout, not
+this number). The script checks the quota before every email and stops cleanly, resuming
+the next day. If you ever outgrow it, Brevo's free tier (300/day, no domain needed) is the
+next step. **Not covered:** rejected payments get no email — contact those students by hand.
 
-✅ **Status:** the script is installed in the society's Apps Script project
-("Bayaan Automation") and `checkConnection` has passed against the live database. The
-`SUPABASE_URL` property must be the API address (`https://<ref>.supabase.co`), *not* the
-dashboard link, and the whole script must sit at the top level of `Code.gs` — not inside
-the placeholder `myFunction() { … }` that a new project starts with. **Not covered:** rejected payments get no email — the
-council contacts those students by hand.
+### Broadcasts — announcements and certificates (Broadcast tab, `/admin.html`)
+Run `supabase/broadcasts.sql` once (✅ applied to the live project on 2026-10-01 as the
+migration `broadcasts_and_deliveries`; it needs `schema.sql` and `events.sql` first).
+
+The admin page **never sends mail itself** — it queues a row in `broadcasts`, and the
+script mails it within about 5 minutes and writes progress back (`sent / total`, failures,
+status `queued → sending → done`), which the page shows in a table that refreshes while you
+watch. A broadcast goes only to registrations marked **verified** for the event you pick,
+once each (`broadcast_deliveries` is what stops a second copy). A run that is cut short, or
+hits the daily quota, simply resumes on the next tick.
+
+* **Message** — e.g. "Room B-12 at 2 PM". Each email opens "Assalam-o-Alaikum <name>,".
+* **Certificates** — each person gets a PDF with their own name, made from a Google Slides
+  template. Per the rule decided 2026-10-01 it goes to **every verified registrant** after the
+  event; there is no attendance tracking.
+* **Send a test to me** queues one sample to *your own* sign-in email and nobody else —
+  always do this first. Real sends ask you to confirm the recipient count, and a second
+  certificate send for the same event warns that everyone would get a *second* one.
+* Only admins can queue one (row-level security). Nobody can edit or delete a broadcast.
+
+**One-time certificate template setup:**
+1. In Google Slides make a landscape deck with your certificate design as the slide
+   background (export the design from Canva as an image → Slide → *Change background* →
+   *Image*), and a text box that reads exactly `{{name}}` where the name goes
+   (`{{event}}` is replaced too, if you use it).
+2. Copy the id from its URL — `docs.google.com/presentation/d/<THIS-PART>/edit` — into a
+   new Script Property `CERT_TEMPLATE_ID`.
+3. Re-run `checkConnection` (it will ask to authorise Drive and Slides), then run
+   `testCertificate` — a sample certificate arrives in your inbox. Fix the template until it
+   looks right, *then* use the Broadcast tab.
+Names typed all-lowercase or all-capitals (`ali raza`, `ALI RAZA`) are tidied to `Ali Raza`
+on certificates and in greetings; names typed with their own capitals are left alone.
+If `CERT_TEMPLATE_ID` is missing, a certificate broadcast is marked **failed** with that
+message and nothing is sent. A single bad address is recorded as failed and skipped, never
+retried, so it cannot stall everyone else. Send-lists are capped at 1000 verified
+registrants per event per run.
 
 ### Known limits, stated plainly
 * **Spam.** There is a honeypot field and the one-per-roll-number rule, but no true rate

@@ -41,10 +41,12 @@ const SB = (() => {
 
   /* insert — `return=minimal` matters: anon has no SELECT on registrations, so
      asking PostgREST to echo the new row back would fail the request. */
-  async function insert(table, row) {
+  async function insert(table, row, { asUser = false } = {}) {
+    /* `asUser` sends the signed-in admin's token instead of the anon key — needed
+       for tables only an admin may write (broadcasts). The public forms never set it. */
     const res = await fetch(`${URL}/rest/v1/${table}`, {
       method: 'POST',
-      headers: base({ Prefer: 'return=minimal' }),
+      headers: (asUser ? auth : base)({ Prefer: 'return=minimal' }),
       body: JSON.stringify(row)
     });
     if (!res.ok) throw await fail(res);

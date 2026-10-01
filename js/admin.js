@@ -13,6 +13,7 @@
 
   let all = [];
   let view = 'registrations';
+  let castPoll = null;
 
   const esc = (s = '') => String(s).replace(/[&<>"]/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
@@ -122,6 +123,20 @@
       t.classList.toggle('is-on', on);
       t.setAttribute('aria-selected', String(on));
     });
+
+    /* the broadcast tab is a form, not a table — it has its own panel */
+    const isCast = view === 'broadcast';
+    $('adTools').hidden = isCast;
+    $('adWrap').hidden  = isCast;
+    $('adCast').hidden  = !isCast;
+    clearInterval(castPoll); castPoll = null;
+    if (isCast) {
+      note.textContent = '';
+      count.textContent = '';
+      castOpen();
+      return;
+    }
+
     head.innerHTML = '<tr>' + V().headers.map(h => '<th>' + h + '</th>').join('') + '</tr>';
     $('adStatus').innerHTML = '<option value="">All statuses</option>' +
       V().statuses.map(s => '<option value="' + s + '">' + s + '</option>').join('');
@@ -248,6 +263,137 @@
       sel.disabled = false;
     }
   });
+
+  /* ══════════════ BROADCAST — queue an email to every verified registrant ══════════════
+     This page never sends mail. It writes a row to `broadcasts`; the Apps Script
+     (automation/confirmation-emails.gs) sends it within ~5 minutes and reports
+     progress back into the same row, which the history table below shows. ─────────── */
+
+  const events = () => (BAYAAN.events && BAYAAN.events.list) || [];
+  const castEvent = $('castEvent'), castSubject = $('castSubject'), castBody = $('castBody');
+  const castErr = $('castErr'), castOk = $('castOk');
+  const castKind = () => document.querySelector('input[name=castKind]:checked').value;
+
+  let castReady = false, subjectDirty = false, bodyDirty = false, recips = 0, recipsAsk = 0;
+  let history = [];
+
+  function castOpen() {
+    if (!castReady) {
+      castReady = true;
+      castEvent.innerHTML = events().map(e =>
+        '<option value="' + esc(e.key) + '">' + esc(e.name) + (e.hidden ? ' (not on the site)' : '') + '</option>').join('');
+
+      castEvent.addEventListener('change', () => { countRecips(); castDefaults(); });
+      document.querySelectorAll('input[name=castKind]').forEach(r =>
+        r.addEventListener('change', () => castDefaults()));
+      castSubject.addEventListener('input', () => { subjectDirty = true; });
+      castBody.addEventListener('input',    () => { bodyDirty = true; });
+      $('castForm').addEventListener('submit', (e) => { e.preventDefault(); castQueue(false); });
+      $('castTest').addEventListener('click', () => castQueue(true));
+      castDefaults(true);
+    }
+    countRecips();
+    castLoad();
+    castPoll = setInterval(castLoad, 15000);          // progress updates while you watch
+  }
+
+  /* sensible starting text — never overwrites something you have typed yourself */
+  function castDefaults(force) {
+    const ev = events().find(e => e.key === castEvent.value) || { name: 'the event' };
+    const cert = castKind() === 'certificate';
+
+    if (force || !subjectDirty) castSubject.value = cert ? 'Your certificate — ' + ev.name : '';
+    if (force || !bodyDirty) {
+      castBody.value = cert
+        ? 'Thank you for being part of the ' + ev.name + '. Your certificate is attached to this email.'
+        : '';
+    }
+    castSubject.placeholder = cert ? '' : 'e.g. Venue for tomorrow’s ' + ev.name;
+    castBody.placeholder = cert
+      ? 'A short note that goes above the attached certificate.'
+      : 'e.g. We meet in Room B-12 at 2:00 PM. Please arrive ten minutes early.';
+    $('castHint').textContent = cert
+      ? 'Each person gets a PDF with their own name on it, made from your Slides template (the script needs CERT_TEMPLATE_ID — see the README). Send a test first.'
+      : 'Each email opens with “Assalam-o-Alaikum <their name>,” and ends with the society’s name.';
+  }
+
+  async function countRecips() {
+    const ask = ++recipsAsk;
+    $('castRecips').textContent = 'Counting…';
+    try {
+      const rows = await SB.select('event_registrations',
+        'select=id&status=eq.verified&event=eq.' + encodeURIComponent(castEvent.value));
+      if (ask !== recipsAsk) return;
+      recips = rows.length;
+      $('castRecips').textContent = recips
+        ? recips + ' verified registrant' + (recips === 1 ? '' : 's') + ' will receive this.'
+        : 'Nobody is verified for this event yet.';
+    } catch (ex) {
+      if (ask === recipsAsk) $('castRecips').textContent = 'Could not count recipients: ' + ex.message;
+    }
+  }
+
+  async function castQueue(test) {
+    castErr.textContent = ''; castOk.textContent = '';
+    const kind = castKind(), subject = castSubject.value.trim(), body = castBody.value.trim();
+    const ev = events().find(e => e.key === castEvent.value);
+    const me = (SB.session.get() && SB.session.get().user && SB.session.get().user.email) || '';
+
+    if (subject.length < 3) { castErr.textContent = 'Give it a subject.'; castSubject.focus(); return; }
+    if (kind === 'message' && body.length < 3) { castErr.textContent = 'Write the message.'; castBody.focus(); return; }
+    if (test && !me) { castErr.textContent = 'Could not tell which email is yours — sign in again.'; return; }
+
+    if (!test) {
+      if (!recips) { castErr.textContent = 'Nobody is verified for this event yet.'; return; }
+      let ask = 'Email ' + recips + ' verified ' + (recips === 1 ? 'person' : 'people') +
+                ' for ' + ev.name + '?\n\nSubject: ' + subject + '\n\nThis cannot be recalled once sent.';
+      const before = history.find(h => h.kind === 'certificate' && kind === 'certificate' &&
+                                       h.event === ev.key && !h.test_to && h.status !== 'failed');
+      if (before) ask = 'Certificates for ' + ev.name + ' were already queued on ' + when(before.created_at) +
+                        '. Sending again means everyone gets a SECOND certificate.\n\n' + ask;
+      if (!confirm(ask)) return;
+    }
+
+    const btn = test ? $('castTest') : $('castSend');
+    btn.disabled = true;
+    try {
+      await SB.insert('broadcasts', {
+        event: ev.key, kind, subject, body: body || null, test_to: test ? me : null
+      }, { asUser: true });
+      castOk.textContent = test
+        ? 'Test queued — a sample goes to ' + me + ' within about 5 minutes.'
+        : 'Queued for ' + recips + '. It goes out within about 5 minutes — watch the progress below.';
+      if (!test) { subjectDirty = bodyDirty = false; castDefaults(true); }
+      castLoad();
+    } catch (ex) {
+      if (ex.status === 401) { SB.signOut(); show(gate); $('adErr').textContent = 'That session expired. Please sign in again.'; return; }
+      castErr.textContent = 'Could not queue that: ' + ex.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function castLoad() {
+    try {
+      history = await SB.select('broadcasts', 'select=*&order=created_at.desc&limit=30');
+      $('castRows').innerHTML = history.length ? history.map(h => {
+        const prog = h.total == null ? '—'
+          : h.sent_count + ' / ' + h.total + (h.failed_count ? ' · ' + h.failed_count + ' failed' : '');
+        return '<tr>' +
+          '<td class="ad__dim">' + esc(when(h.created_at)) + '</td>' +
+          '<td><span class="ad__tag">' + esc(eventName(h.event)) + '</span></td>' +
+          '<td>' + (h.kind === 'certificate' ? 'Certificates' : 'Message') + (h.test_to ? ' <span class="ad__dim">(test)</span>' : '') + '</td>' +
+          '<td>' + esc(h.subject) + '</td>' +
+          '<td class="ad__mono">' + esc(prog) + '</td>' +
+          '<td><span class="ad__st ad__st--' + ({ queued: 'pending', sending: 'pending', done: 'verified', failed: 'rejected' }[h.status] || 'new') + '">' +
+            esc(h.status) + '</span>' + (h.error ? '<br /><span class="ad__dim">' + esc(h.error) + '</span>' : '') + '</td>' +
+        '</tr>';
+      }).join('') : '<tr><td colspan="6" class="ad__dim">Nothing sent yet.</td></tr>';
+    } catch (ex) {
+      if (ex.status === 401) { clearInterval(castPoll); SB.signOut(); show(gate); $('adErr').textContent = 'That session expired. Please sign in again.'; return; }
+      note.textContent = 'Could not load broadcasts: ' + ex.message;
+    }
+  }
 
   /* ── CSV ── */
   $('adCsv').addEventListener('click', () => {

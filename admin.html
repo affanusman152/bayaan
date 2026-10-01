@@ -60,9 +60,10 @@
   <div class="ad__tabs" role="tablist">
     <button class="ad__tab is-on" id="adTabReg" type="button" role="tab" data-view="registrations">Induction</button>
     <button class="ad__tab" id="adTabEv" type="button" role="tab" data-view="events">Events</button>
+    <button class="ad__tab" id="adTabCast" type="button" role="tab" data-view="broadcast">Broadcast</button>
   </div>
 
-  <div class="ad__tools">
+  <div class="ad__tools" id="adTools">
     <input class="ad__search" id="adSearch" type="search" placeholder="Search…" />
     <select class="ad__filter" id="adStatus"></select>
     <span class="ad__count" id="adCount"></span>
@@ -70,12 +71,57 @@
     <button class="ad__btn ad__btn--ghost" id="adCsv" type="button">Export CSV</button>
   </div>
 
-  <div class="ad__wrap">
+  <div class="ad__wrap" id="adWrap">
     <table class="ad__table">
       <thead id="adHead"></thead>
       <tbody id="adRows"></tbody>
     </table>
   </div>
+
+  <!-- ───── BROADCAST: email every verified registrant of an event ─────
+       Queues a row in `broadcasts`; the Apps Script does the sending. -->
+  <section class="ad__cast" id="adCast" hidden>
+    <form class="ad__castform" id="castForm" novalidate>
+      <h2>Email everyone verified</h2>
+      <p class="ad__muted">
+        Goes only to registrations marked <b>verified</b> for the event you pick. It is queued
+        here and sent by the mail script within about 5 minutes.
+      </p>
+
+      <label>Event
+        <select id="castEvent"></select>
+      </label>
+      <p class="ad__recips" id="castRecips"></p>
+
+      <div class="ad__kind" role="radiogroup" aria-label="What to send">
+        <label><input type="radio" name="castKind" value="message" checked /> <span>Message <small>(e.g. room &amp; time)</small></span></label>
+        <label><input type="radio" name="castKind" value="certificate" /> <span>Certificates <small>(PDF attached, one per person)</small></span></label>
+      </div>
+
+      <label>Subject
+        <input type="text" id="castSubject" maxlength="150" />
+      </label>
+      <label>Message
+        <textarea id="castBody" rows="6" maxlength="3000"></textarea>
+      </label>
+      <p class="ad__muted" id="castHint"></p>
+
+      <div class="ad__castbtns">
+        <button class="ad__btn ad__btn--ghost" type="button" id="castTest">Send a test to me</button>
+        <button class="ad__btn" type="submit" id="castSend">Send to everyone</button>
+      </div>
+      <p class="ad__err" id="castErr" role="alert"></p>
+      <p class="ad__ok" id="castOk" role="status"></p>
+    </form>
+
+    <h3 class="ad__subhead">Sent &amp; queued</h3>
+    <div class="ad__wrap">
+      <table class="ad__table">
+        <thead><tr><th>Queued</th><th>Event</th><th>Type</th><th>Subject</th><th>Progress</th><th>Status</th></tr></thead>
+        <tbody id="castRows"></tbody>
+      </table>
+    </div>
+  </section>
 
   <p class="ad__note" id="adNote"></p>
 </main>
