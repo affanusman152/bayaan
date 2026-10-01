@@ -32,17 +32,22 @@ const BAYAAN = {
      `open: true`; until then the popup would invite payment
      screenshots without saying where to pay. */
   events: {
-    open: false,
-    blurb: "Pick your event, pay the fee, and upload the screenshot. We'll verify it and confirm by email.",
+    open: true,
+    title: "Workshop registration",
+    blurb: "Pay the fee, upload the screenshot, and we'll verify it and confirm by email.",
     pay: {
       method:  "",     // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
       title:   "",     // account title
       account: "",     // account / IBAN / wallet number
       fee:     ""      // e.g. "Rs. 500"
     },
+    /* `includes` — what one registration covers; shown in the popup.
+       `hidden: true` — keeps an event defined (the admin board still shows its
+       name on old rows) but out of the popup and the pill. Drop the flag to open it. */
     list: [
-      { key: "workshop",  name: "Workshop",  ur: "ورکشاپ" },
-      { key: "dramatics", name: "Dramatics", ur: "ڈرامہ"  }
+      { key: "workshop",  name: "Workshop",  ur: "ورکشاپ",
+        includes: ["Asian Style of Debating", "Public Speaking"] },
+      { key: "dramatics", name: "Dramatics", ur: "ڈرامہ", hidden: true }
     ]
   },
 

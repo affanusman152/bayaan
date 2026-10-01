@@ -131,6 +131,7 @@ css/logo.css        every placement of the mark, in one file
 css/ui.css          top bar · drawer · curtain · buttons · ticker
 css/screens.css     hero · about · wings · ventures · team · join · form
 css/motion.css      reveal utilities + screen enter/exit
+automation/confirmation-emails.gs  Google Apps Script (runs on Google, not on the site) — emails verified registrants
 css/events.css      the event popup and its "Register" pill
 css/admin.css       the board — dense and plain, palette only
 js/data.js          ← content lives here, plus the two Supabase values
@@ -232,12 +233,29 @@ sees it twice in the same visit. Both are remembered in browser storage.
    `title`, `fee`). Anything left blank is simply not shown; with `account` blank the popup
    says payment details will appear shortly.
 4. Set `BAYAAN.events.open` to `true` to switch the popup and pill on, `false` to switch
-   them off. **It is currently `false`** — the code is deployed but dormant until you
-   fill in `pay.account` and flip it.
+   them off. **It is currently `true`, for the Workshop only.**
 
-⚠️ With `open: true` and `pay.account` still blank, the popup invites people to submit a
-payment screenshot without telling them where to pay. Fill `pay.account` in before
-deploying with `open: true`, or deploy with `open: false` until then.
+**Which events show.** `BAYAAN.events.list` holds every event; an entry with
+`hidden: true` stays defined (the admin board still resolves its name on old rows) but is
+kept out of the popup and the pill. **Dramatics is currently hidden** — delete its
+`hidden: true` to open it; with two visible events the popup shows a picker, with one it
+skips the picker and pre-selects it. `includes: [...]` lists what one registration covers
+and is shown in a highlighted box in the popup.
+
+**The Workshop** is one event (`key: "workshop"`, one fee, one registration) that covers
+two sessions: *Asian Style of Debating* and *Public Speaking*. Both are listed in the
+popup and in the confirmation email.
+
+⚠️ While `pay.account` is blank the popup says payment details will appear shortly, so
+nobody can pay yet — fill `pay.account` (and `method`, `title`, `fee`) in as soon as you
+have them.
+
+**Planned, not built:** a "thank you — verification in progress" email on submission; an
+admin-panel **broadcast** button (e.g. "come to Room B-12") that queues a message the
+Apps Script mails to every verified registrant of an event; and **certificates** (a Slides
+template filled per person, attached as PDF) sent to **all verified** registrants after the
+event. The certificate rule decided 2026-10-01: everyone verified gets one — no attendance
+tracking.
 
 ### What the rules enforce
 | Who | Can |
@@ -256,12 +274,41 @@ Open the **Events** tab, click **View screenshot**, compare it with the account 
 then set the row's status to `verified` (or `rejected`). Moving to `verified` stamps
 `verified_at` automatically. `confirmation_sent_at` is reserved for the email automation.
 
-**Not built yet:** the confirmation email. The popup tells people "we'll check your
-payment and email you" — until the n8n workflow exists, that email is sent by hand from
-the CSV export. The plan: a Supabase database webhook fires when `status` becomes
-`verified`, n8n emails the student and writes `confirmation_sent_at` back. Keep the n8n
-credentials (Gmail app password, Supabase **service-role** key) inside n8n only, never in
-this public repo.
+### Confirmation emails — a free Google Apps Script
+`automation/confirmation-emails.gs` is **not part of the website**. It runs on Google's
+servers under the society's Gmail, and the copy in the repo is for versioning and
+reference. Every 5 minutes it fetches rows that are `verified` but have no
+`confirmation_sent_at`, emails each student from that Gmail, then stamps the row. Polling
+means a missed run just catches up; the stamp is guarded (`is.null`) so nobody is emailed
+twice. There is no n8n and no server — it was dropped as an unaffordable extra.
+
+**Setup (≈10 min, free, done once):**
+1. Sign in to the society Gmail → <https://script.google.com> → **New project** → paste in
+   the whole of `automation/confirmation-emails.gs`.
+2. Edit the `EVENTS` block at the top (date, venue, notes — blank lines are left out).
+3. ⚙ **Project Settings → Script Properties** → add `SUPABASE_URL`
+   (`https://rqmolxyuvuyuluzqmrbc.supabase.co`) and `SUPABASE_SERVICE_KEY` (Supabase →
+   Project Settings → API → **service_role**). ⚠️ That key is a master key: it lives only
+   here, never in the repo, the site, or a chat. Rotate it in Supabase if it ever leaks.
+4. In the editor pick `checkConnection` → **Run**. Approve the permissions (Advanced → "Go
+   to … (unsafe)" is normal for your own script). It should report the Gmail quota and how
+   many verified rows are waiting.
+5. Run `testEmail` — sends a sample of each event's email to *you only*.
+6. Run `installTrigger` — starts the 5-minute timer. `removeTrigger` stops it.
+
+**Limits:** Apps Script caps how many emails a Google account can send per day, and
+`checkConnection` prints what is left (the society account showed **1500** on
+2026-10-01; plain consumer accounts have historically been nearer 100, so trust that
+printout, not this number). The script checks the remaining quota before every email
+and stops cleanly, resuming the next day. If you ever outgrow it, Brevo's free tier
+(300/day, no domain needed) is the next step.
+
+✅ **Status:** the script is installed in the society's Apps Script project
+("Bayaan Automation") and `checkConnection` has passed against the live database. The
+`SUPABASE_URL` property must be the API address (`https://<ref>.supabase.co`), *not* the
+dashboard link, and the whole script must sit at the top level of `Code.gs` — not inside
+the placeholder `myFunction() { … }` that a new project starts with. **Not covered:** rejected payments get no email — the
+council contacts those students by hand.
 
 ### Known limits, stated plainly
 * **Spam.** There is a honeypot field and the one-per-roll-number rule, but no true rate

@@ -13,8 +13,11 @@ const Events = (() => {
   const form  = document.getElementById('evForm');
   const pill  = document.getElementById('evPill');
 
+  /* events still taking registrations — `hidden` ones stay defined but out of sight */
+  const LIST = (cfg.list || []).filter(e => !e.hidden);
+
   /* Absent on the admin page, and inert until configured and switched on. */
-  if (!modal || !form || !cfg.open || !(cfg.list || []).length) return { init(){} };
+  if (!modal || !form || !cfg.open || !LIST.length) return { init(){} };
 
   const $ = (id) => document.getElementById(id);
   const card = modal.querySelector('.evm__card');
@@ -35,9 +38,10 @@ const Events = (() => {
 
   /* ── paint ── */
   function paint() {
+    $('evTitle').textContent = cfg.title || 'Event registration';
     $('evSub').textContent = cfg.blurb || '';
 
-    picker.innerHTML = cfg.list.map(e => `
+    picker.innerHTML = LIST.map(e => `
       <label class="wingpick__opt">
         <input type="radio" name="event" value="${esc(e.key)}" />
         <span class="wingpick__box" aria-hidden="true"></span>
@@ -46,10 +50,11 @@ const Events = (() => {
       </label>`).join('');
 
     /* a single event needs no choosing */
-    if (cfg.list.length === 1) {
+    if (LIST.length === 1) {
       picker.querySelector('input').checked = true;
       $('evPickWrap').hidden = true;
     }
+    paintIncludes();
 
     const p = cfg.pay || {};
     const rows = [['Fee', p.fee], ['Send to', p.method], ['Account title', p.title], ['Account', p.account]]
@@ -59,7 +64,19 @@ const Events = (() => {
       : '<p class="evm__soon">Payment details will appear here shortly.</p>';
 
     pill.querySelector('span').textContent =
-      'Register · ' + cfg.list.map(e => e.name).join(' & ');
+      'Register · ' + LIST.map(e => e.name).join(' & ');
+  }
+
+  /* "your registration covers…" — follows whichever event is selected */
+  function paintIncludes() {
+    const box = $('evIncl');
+    const ev = LIST.find(e => e.key === form.elements.event.value);
+    const items = (ev && ev.includes) || [];
+    box.hidden = !items.length;
+    box.innerHTML = items.length
+      ? `<p class="evm__incl-head">One registration covers ${items.length === 2 ? 'both' : 'all'}</p>
+         <ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
+      : '';
   }
 
   /* ── open / close ── */
@@ -183,6 +200,8 @@ const Events = (() => {
     /* a friend sharing the same phone, or one person doing both events */
     $('evAgain').addEventListener('click', () => {
       form.reset();
+      if (LIST.length === 1) picker.querySelector('input').checked = true;   // reset() unticks it
+      paintIncludes();
       form.querySelectorAll('.is-bad').forEach(el => el.classList.remove('is-bad'));
       form.querySelectorAll('.fld__err').forEach(el => { el.textContent = ''; });
       status.textContent = '';
@@ -195,7 +214,10 @@ const Events = (() => {
 
     /* an inline error clears the moment the field is touched */
     form.addEventListener('input', (e) => { if (e.target.name) setErr(e.target.name, ''); });
-    form.addEventListener('change', (e) => { if (e.target.name) setErr(e.target.name, ''); });
+    form.addEventListener('change', (e) => {
+      if (e.target.name) setErr(e.target.name, '');
+      if (e.target.name === 'event') paintIncludes();
+    });
 
     document.addEventListener('keydown', (e) => {
       if (!isOpen) return;
