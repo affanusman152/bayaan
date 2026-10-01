@@ -65,6 +65,29 @@ const SB = (() => {
     if (!res.ok) throw await fail(res);
   }
 
+  /* upload — a private bucket. Anyone may add a file; nobody may list, read or
+     overwrite one (no `x-upsert`), see supabase/events.sql. */
+  async function upload(bucket, path, file) {
+    const res = await fetch(`${URL}/storage/v1/object/${bucket}/${path}`, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': file.type },
+      body: file
+    });
+    if (!res.ok) throw await fail(res);
+  }
+
+  /* a short-lived link to a private file; only an admin's session can mint one */
+  async function signedUrl(bucket, path, seconds = 300) {
+    const res = await fetch(`${URL}/storage/v1/object/sign/${bucket}/${path}`, {
+      method: 'POST',
+      headers: auth(),
+      body: JSON.stringify({ expiresIn: seconds })
+    });
+    if (!res.ok) throw await fail(res);
+    const { signedURL } = await res.json();
+    return `${URL}/storage/v1${signedURL}`;
+  }
+
   async function signIn(email, password) {
     const res = await fetch(`${URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
@@ -79,5 +102,5 @@ const SB = (() => {
 
   function signOut() { session.clear(); }
 
-  return { configured, insert, select, patch, signIn, signOut, session };
+  return { configured, insert, select, patch, upload, signedUrl, signIn, signOut, session };
 })();

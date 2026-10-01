@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="css/logo.css" />
 <link rel="stylesheet" href="css/ui.css" />
 <link rel="stylesheet" href="css/screens.css" />
+<link rel="stylesheet" href="css/events.css" />
 <link rel="stylesheet" href="css/motion.css" />
 </head>
 <body class="is-booting">
@@ -393,6 +394,82 @@
 
 </main>
 
+<!-- ═══════════════════ EVENT REGISTRATION POPUP ═══════════════════
+     Content and on/off switch live in BAYAAN.events (js/data.js);
+     behaviour in js/events.js. Hidden unless the popup is open. -->
+<div class="evm" id="evModal" role="dialog" aria-modal="true" aria-labelledby="evTitle" hidden>
+  <div class="evm__scrim" data-ev-close></div>
+
+  <div class="evm__card" tabindex="-1">
+    <button class="evm__x" type="button" data-ev-close aria-label="Close">&times;</button>
+
+    <p class="evm__live"><i></i> Registrations open now</p>
+    <h2 class="evm__title" id="evTitle">Event registration</h2>
+    <p class="evm__sub" id="evSub"></p>
+
+    <form class="evm__form" id="evForm" novalidate>
+      <fieldset class="reg__wings" id="evPickWrap">
+        <legend>Which event? <i>*</i></legend>
+        <div class="wingpick" id="evPick"></div>
+        <em class="fld__err" id="ev_err_event"></em>
+      </fieldset>
+
+      <dl class="evm__pay" id="evPay"></dl>
+
+      <label class="fld">
+        <span class="fld__label">Full name <i>*</i></span>
+        <input class="fld__in" name="full_name" type="text" required maxlength="80" autocomplete="name" />
+        <em class="fld__err" id="ev_err_full_name"></em>
+      </label>
+
+      <label class="fld">
+        <span class="fld__label">Roll number <i>*</i></span>
+        <input class="fld__in" name="roll_no" type="text" required maxlength="24" placeholder="25M-0524" />
+        <em class="fld__err" id="ev_err_roll_no"></em>
+      </label>
+
+      <label class="fld">
+        <span class="fld__label">Email <i>*</i></span>
+        <input class="fld__in" name="email" type="email" required maxlength="120" autocomplete="email" />
+        <em class="fld__err" id="ev_err_email"></em>
+      </label>
+
+      <label class="fld">
+        <span class="fld__label">Payment screenshot <i>*</i></span>
+        <input class="fld__in fld__in--file" name="proof" type="file" accept="image/jpeg,image/png,image/webp" />
+        <em class="fld__err" id="ev_err_proof"></em>
+      </label>
+
+      <!-- honeypot: real people never see this, bots fill it in -->
+      <div class="reg__trap" aria-hidden="true">
+        <label>Leave this field empty
+          <input name="website" type="text" tabindex="-1" autocomplete="off" />
+        </label>
+      </div>
+
+      <button class="btn btn--gold btn--lg reg__send" type="submit" id="evSend">
+        <span>Send registration</span>
+      </button>
+      <p class="reg__status" id="evStatus" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="evm__done" id="evDone" hidden>
+      <p class="reg__shut-head">Registration received.</p>
+      <p class="reg__shut-note">
+        We'll check your payment and email you once it's confirmed.
+      </p>
+      <div class="evm__done-actions">
+        <button class="btn btn--gold" type="button" id="evDoneClose" data-ev-close><span>Done</span></button>
+        <button class="btn btn--ghost" type="button" id="evAgain"><span>Register another</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="evpill" id="evPill" type="button" hidden>
+  <i aria-hidden="true"></i><span>Register</span>
+</button>
+
 <script src="js/data.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/logo.js"></script>
@@ -402,6 +479,7 @@
 <script src="js/router.js"></script>
 <script src="js/intro.js"></script>
 <script src="js/join.js"></script>
+<script src="js/events.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

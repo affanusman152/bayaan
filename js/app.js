@@ -19,6 +19,10 @@
   // 1b — the registration form (no-ops unless Supabase is configured)
   Join.init();
 
+  // 1c — the event popup; registers its own 'bayaan:ready' listener, so it
+  //      must be set up before Intro.init() below
+  Events.init();
+
   // 2 — chrome
   Drawer.init();
   Router.init();

@@ -23,6 +23,29 @@ const BAYAAN = {
     introMs:     820                                   // how long the curtain seal holds
   },
 
+  /* ── event registration popup ─────────────────────────
+     Pops up when the site opens (once per visit) and stays
+     reachable from a small pill at the foot of the screen.
+     Needs supabase/events.sql run first (already applied).
+     `open: false` switches the popup and the pill off.
+     `pay.account` is blank on purpose — fill it in, THEN set
+     `open: true`; until then the popup would invite payment
+     screenshots without saying where to pay. */
+  events: {
+    open: false,
+    blurb: "Pick your event, pay the fee, and upload the screenshot. We'll verify it and confirm by email.",
+    pay: {
+      method:  "",     // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
+      title:   "",     // account title
+      account: "",     // account / IBAN / wallet number
+      fee:     ""      // e.g. "Rs. 500"
+    },
+    list: [
+      { key: "workshop",  name: "Workshop",  ur: "ورکشاپ" },
+      { key: "dramatics", name: "Dramatics", ur: "ڈرامہ"  }
+    ]
+  },
+
   /* ── marquee couplets / phrases ───────────────────── */
   ticker: [
     { ur: "نرم دم گفتگو گرم دم جستجو" },

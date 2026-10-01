@@ -14,6 +14,7 @@
 </head>
 <body>
 
+  
 <header class="ad__bar">
   <a class="ad__brand" href="index.html">
     <img src="assets/logo.png" alt="" />
@@ -56,15 +57,14 @@
 
 <!-- the board -->
 <main class="ad__board" id="adBoard" hidden>
+  <div class="ad__tabs" role="tablist">
+    <button class="ad__tab is-on" id="adTabReg" type="button" role="tab" data-view="registrations">Induction</button>
+    <button class="ad__tab" id="adTabEv" type="button" role="tab" data-view="events">Events</button>
+  </div>
+
   <div class="ad__tools">
-    <input class="ad__search" id="adSearch" type="search" placeholder="Search name, roll, email, wing…" />
-    <select class="ad__filter" id="adStatus">
-      <option value="">All statuses</option>
-      <option value="new">New</option>
-      <option value="shortlisted">Shortlisted</option>
-      <option value="accepted">Accepted</option>
-      <option value="rejected">Rejected</option>
-    </select>
+    <input class="ad__search" id="adSearch" type="search" placeholder="Search…" />
+    <select class="ad__filter" id="adStatus"></select>
     <span class="ad__count" id="adCount"></span>
     <button class="ad__btn ad__btn--ghost" id="adRefresh" type="button">Refresh</button>
     <button class="ad__btn ad__btn--ghost" id="adCsv" type="button">Export CSV</button>
@@ -72,18 +72,7 @@
 
   <div class="ad__wrap">
     <table class="ad__table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Received</th>
-          <th>Name</th>
-          <th>Roll</th>
-          <th>Contact</th>
-          <th>Batch / Dept</th>
-          <th>Wings</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+      <thead id="adHead"></thead>
       <tbody id="adRows"></tbody>
     </table>
   </div>

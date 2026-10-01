@@ -92,6 +92,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 | Want to change | Edit |
 |---|---|
 | Registration form | it posts to Supabase — see **Registrations** below |
+| **Event popup** (workshop / dramatics) — events, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below. `pay.account` is blank until you add it |
 | Ticker couplets | `BAYAAN.ticker` |
 | Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
@@ -120,23 +121,26 @@ its internal geometry.
 
 ```
 index.html          all six screens, in order
-admin.html          the registrations board (noindex, not linked from the site)
+admin.html          the registrations board — Induction + Events tabs (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
-supabase/schema.sql the tables and row-level-security rules — run this once
+supabase/schema.sql the induction tables and row-level-security rules — run this once
+supabase/events.sql the event-registration table + private screenshot bucket — run after schema.sql
 css/tokens.css      colour · type · spacing · easing curves
 css/base.css        reset + grain/vignette/aura ambience
 css/logo.css        every placement of the mark, in one file
 css/ui.css          top bar · drawer · curtain · buttons · ticker
 css/screens.css     hero · about · wings · ventures · team · join · form
 css/motion.css      reveal utilities + screen enter/exit
+css/events.css      the event popup and its "Register" pill
 css/admin.css       the board — dense and plain, palette only
 js/data.js          ← content lives here, plus the two Supabase values
 js/logo.js          loads the mark, keys out the black, fits it to the mask
 js/motion.js        reveal engine, counters, parallax, magnetics
 js/render.js        data → DOM
-js/supabase.js      ~60 lines of fetch — no SDK, no build step
-js/join.js          the registration form
-js/admin.js         sign-in, the table, triage, CSV export
+js/supabase.js      ~80 lines of fetch (REST + storage) — no SDK, no build step
+js/join.js          the induction registration form
+js/events.js        the event popup: auto-open, validation, screenshot upload, submit
+js/admin.js         sign-in, both tables (Induction / Events), triage, screenshot viewer, CSV export
 js/drawer.js        drawer + focus trap + swipe gestures
 js/router.js        hash routing + the curtain transition
 js/intro.js         the intro — reuses the router's curtain
@@ -207,10 +211,64 @@ CSV cells that begin with `=`, `+`, `-` or `@` are prefixed with an apostrophe o
 because Excel and Sheets execute those as formulas — a real attack route through any
 public form.
 
+## Event registration (workshop + dramatics)
+
+A popup that opens on its own when the site loads — after the intro curtain clears,
+once per visit — and stays reachable from a gold **Register** pill at the foot of the
+screen. The visitor picks an event, reads where to send the money, and submits **name,
+roll number, email and a screenshot of the payment**. One event per submission; someone
+doing both submits twice (the popup offers "Register another").
+
+It is **not shown to anyone who has already registered** from that browser, and nobody
+sees it twice in the same visit. Both are remembered in browser storage.
+
+### Switching it on
+1. Supabase is already configured (see **Registrations**), and `schema.sql` has been run.
+2. Run **`supabase/events.sql`** (paste it into the SQL editor). It creates
+   `event_registrations` and a **private** `payment-proofs` storage bucket. Safe to re-run.
+   ✅ *Already applied to the live project on 2026-10-01 as the migration
+   `event_registrations_and_payment_proofs`, and the permissions were tested against it.*
+3. Fill in `BAYAAN.events.pay` in `js/data.js` — `account` (and, if you like, `method`,
+   `title`, `fee`). Anything left blank is simply not shown; with `account` blank the popup
+   says payment details will appear shortly.
+4. Set `BAYAAN.events.open` to `true` to switch the popup and pill on, `false` to switch
+   them off. **It is currently `false`** — the code is deployed but dormant until you
+   fill in `pay.account` and flip it.
+
+⚠️ With `open: true` and `pay.account` still blank, the popup invites people to submit a
+payment screenshot without telling them where to pay. Fill `pay.account` in before
+deploying with `open: true`, or deploy with `open: false` until then.
+
+### What the rules enforce
+| Who | Can |
+|---|---|
+| Anyone (the popup) | upload one image to the bucket, and insert a row with status `pending` — nothing else |
+| Anyone | **cannot read, list, overwrite or delete** any screenshot or row |
+| An admin | read every row and screenshot (through a 5-minute signed link), set `status` and `notes` |
+
+The bucket itself rejects anything over **5 MB** or that is not JPG / PNG / WebP, so those
+limits hold even if someone bypasses `js/events.js`. One registration per roll number
+**per event** is a unique index. A failed submit after a good upload can leave one stray,
+unreadable image behind — harmless.
+
+### Verifying payments — the Events tab on `/admin.html`
+Open the **Events** tab, click **View screenshot**, compare it with the account statement,
+then set the row's status to `verified` (or `rejected`). Moving to `verified` stamps
+`verified_at` automatically. `confirmation_sent_at` is reserved for the email automation.
+
+**Not built yet:** the confirmation email. The popup tells people "we'll check your
+payment and email you" — until the n8n workflow exists, that email is sent by hand from
+the CSV export. The plan: a Supabase database webhook fires when `status` becomes
+`verified`, n8n emails the student and writes `confirmation_sent_at` back. Keep the n8n
+credentials (Gmail app password, Supabase **service-role** key) inside n8n only, never in
+this public repo.
+
 ### Known limits, stated plainly
 * **Spam.** There is a honeypot field and the one-per-roll-number rule, but no true rate
   limiting — that needs an edge function. Fine for a campus induction; not fine for a
-  form left open to the whole internet for months.
+  form left open to the whole internet for months. The event popup is the same, with one
+  addition: a bot could fill the screenshot bucket with 5 MB images, which is another
+  reason to switch `events.open` off when registrations close.
 * **Client-side validation is courtesy, not security.** Anyone can POST straight past
   `js/join.js`. Every rule is also a database constraint, and that is the one that counts.
 * **Applicants' phone numbers and emails are personal data.** Only add people to `admins`

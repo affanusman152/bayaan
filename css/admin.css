@@ -127,6 +127,22 @@ code {
 /* ── board ── */
 .ad__board { padding: 1rem clamp(.6rem, 2.5vw, 1.6rem) 3rem; }
 
+.ad__tabs { display: flex; gap: .4rem; margin-bottom: .9rem; }
+.ad__tab {
+  padding: .5rem 1.1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: none;
+  color: var(--cream-dim);
+  font-family: var(--f-display);
+  font-size: .82rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ad__tab:hover { border-color: var(--line); }
+.ad__tab.is-on { border-color: var(--gold-deep); background: rgba(124,15,20,.4); color: var(--gold-lite); }
+
 .ad__tools {
   display: flex;
   flex-wrap: wrap;
@@ -220,6 +236,8 @@ code {
 }
 .ad__st:focus { outline: none; border-color: var(--gold); }
 .ad__st--new         { color: var(--cream-dim); }
+.ad__st--pending     { color: var(--gold-lite);  border-color: var(--gold-deep); }
+.ad__st--verified    { color: #7BD88F;           border-color: rgba(123,216,143,.5); }
 .ad__st--shortlisted { color: var(--gold-lite);  border-color: var(--gold-deep); }
 .ad__st--accepted    { color: #7BD88F;           border-color: rgba(123,216,143,.5); }
 .ad__st--rejected    { color: #E8737A;           border-color: rgba(232,115,122,.45); }

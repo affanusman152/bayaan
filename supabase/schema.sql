@@ -2,6 +2,8 @@
 --  BAYAAN — induction registrations
 --  Run this ONCE, whole, in the Supabase SQL editor.
 --  Safe to re-run: everything is `if not exists` / `drop policy if exists`.
+--  Event registrations (workshop / dramatics) live in events.sql — run that
+--  AFTER this file, since it reuses public.is_admin().
 -- ═══════════════════════════════════════════════════════════════════════
 
 create extension if not exists pgcrypto;

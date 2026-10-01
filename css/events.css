@@ -1,0 +1,163 @@
+/* ══════════════ EVENT REGISTRATION POPUP ══════════════
+   Sits above the drawer (60) and below the curtain (80). The fields, buttons
+   and event picker are the join form's own classes (.fld, .btn, .wingpick) so
+   the two forms can never drift apart. ──────────────────────────────── */
+
+.evm {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: max(.8rem, env(safe-area-inset-top)) .8rem max(.8rem, env(safe-area-inset-bottom));
+}
+.evm[hidden] { display: none; }
+
+.evm__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6,3,4,.72);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  opacity: 0;
+  transition: opacity .5s var(--e-ink);
+}
+.evm.is-on .evm__scrim { opacity: 1; }
+
+.evm__card {
+  position: relative;
+  width: min(100%, 31rem);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-deep) transparent;
+  outline: none;
+  padding: 1.8rem clamp(1.1rem, 4vw, 1.8rem) 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(124,15,20,.5), transparent 70%),
+    var(--ink-2);
+  box-shadow: var(--shadow), var(--shadow-gold);
+  opacity: 0;
+  transform: translateY(26px) scale(.97);
+  transition: opacity .5s var(--e-ink), transform .6s var(--e-spring);
+}
+.evm.is-on .evm__card { opacity: 1; transform: none; }
+
+.evm__x {
+  position: absolute;
+  top: .7rem; right: .8rem;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--cream-dim);
+  transition: background .3s, color .3s;
+}
+.evm__x:hover { background: rgba(124,15,20,.45); color: var(--cream); }
+
+.evm__live {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  font-family: var(--f-display);
+  font-size: .8rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.evm__live i, .evpill i {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #E8737A;
+  box-shadow: 0 0 0 0 rgba(232,115,122,.6);
+  animation: evPulse 1.8s infinite;
+}
+@keyframes evPulse {
+  70%  { box-shadow: 0 0 0 9px rgba(232,115,122,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,115,122,0); }
+}
+
+.evm__title {
+  margin-top: .5rem;
+  font-family: var(--f-display);
+  font-size: var(--t-xl);
+  line-height: 1;
+  letter-spacing: .03em;
+  color: var(--cream);
+}
+.evm__sub { margin-top: .6rem; font-size: var(--t-sm); color: var(--cream-dim); line-height: 1.55; }
+
+.evm__form { display: grid; gap: .5rem; margin-top: 1.3rem; }
+
+/* where to send the money */
+.evm__pay {
+  display: grid;
+  gap: .45rem;
+  padding: .9rem 1rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-sm);
+  background: rgba(10,6,7,.45);
+}
+.evm__pay div { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--t-sm); }
+.evm__pay dt {
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.evm__pay dd { color: var(--gold-lite); text-align: right; word-break: break-all; user-select: all; }
+.evm__soon { font-size: var(--t-sm); color: var(--cream-dim); text-align: center; }
+
+.fld__in--file { padding: .6rem .7rem; font-size: var(--t-sm); cursor: pointer; }
+.fld__in--file::file-selector-button {
+  margin-right: .8rem;
+  padding: .45rem .9rem;
+  border: 1px solid var(--gold-deep);
+  border-radius: 999px;
+  background: rgba(227,167,47,.12);
+  color: var(--gold-lite);
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.evm__done { text-align: center; padding: 1.6rem 0 .4rem; }
+.evm__done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-top: 1.4rem; }
+
+/* the pill — how to get back to the popup after closing it */
+.evpill {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .75rem 1.25rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold) 45%, var(--gold-lite));
+  color: var(--ink);
+  font-family: var(--f-display);
+  font-size: .9rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: var(--shadow-gold), 0 10px 30px -10px rgba(0,0,0,.8);
+  transition: transform .35s var(--e-ink);
+}
+.evpill[hidden] { display: none; }
+.evpill:hover  { transform: translateX(-50%) translateY(-2px); }
+.evpill:active { transform: translateX(-50%) scale(.96); }
+/* no popup while the curtain is mid-wipe, and none under the open drawer */
+body.is-booting .evpill, body.is-locked .evpill { opacity: 0; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .evm__live i, .evpill i { animation: none; }
+}
