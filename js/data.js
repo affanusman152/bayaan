@@ -155,9 +155,7 @@ const BAYAAN = {
     { role: "Vice President",       name: "Ibrahim Khan",       photo: "assets/team/ibrahim-khan.jpg" },
     { role: "Vice President",       name: "Maryam Iqbal",       photo: "assets/team/maryam-iqbal.jpg" },
     { role: "General Secretary",    name: "Irtiza",             photo: "assets/team/irtiza.jpg" },
-    { role: "Finance Secretary",    name: "Zainab bint-e-Asad", photo: "assets/team/zainab-bint-e-asad.jpg" },
     { role: "Information Secretary",name: "Haiqa Imran",        photo: "assets/team/haiqa-imran.jpg" },
-    { role: "Content Manager",      name: "Muhammad Tariq",     photo: "assets/team/muhammad-tariq.jpg" },
     { role: "Media Head",           name: "Mahnoor",            photo: "assets/team/mahnoor.jpg" },
     { role: "Decor Head",           name: "Alishba",            photo: "assets/team/alishba.jpg" },
     { role: "Event Head",           name: "M Umais",            photo: "assets/team/m-umais.jpg" }
