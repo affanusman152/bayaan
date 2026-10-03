@@ -39,7 +39,7 @@ const BAYAAN = {
       method:  "",     // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
       title:   "",     // account title
       account: "",     // account / IBAN / wallet number
-      fee:     ""      // e.g. "Rs. 500"
+      fee:     "PKR 200"
     },
     /* `includes` — what one registration covers; shown in the popup.
        `hidden: true` — keeps an event defined (the admin board still shows its
