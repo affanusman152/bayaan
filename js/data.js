@@ -28,17 +28,17 @@ const BAYAAN = {
      reachable from a small pill at the foot of the screen.
      Needs supabase/events.sql run first (already applied).
      `open: false` switches the popup and the pill off.
-     `pay.account` is blank on purpose — fill it in, THEN set
-     `open: true`; until then the popup would invite payment
-     screenshots without saying where to pay. */
+     `pay.account` set 2026-10-04. If it is ever blanked, the
+     popup says payment details are coming — switch `open` off
+     first so nobody is invited to pay without knowing where. */
   events: {
     open: true,
     title: "Workshop registration",
     blurb: "Pay the fee, upload the screenshot, and we'll verify it and confirm by email.",
     pay: {
-      method:  "",     // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
-      title:   "",     // account title
-      account: "",     // account / IBAN / wallet number
+      method:  "NayaPay",          // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
+      title:   "M. Umais",         // account title
+      account: "+92 307 6537688",  // account / IBAN / wallet number
       fee:     "PKR 200"
     },
     /* `includes` — what one registration covers; shown in the popup.

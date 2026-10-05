@@ -92,7 +92,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 | Want to change | Edit |
 |---|---|
 | Registration form | it posts to Supabase — see **Registrations** below |
-| **Event popup** (workshop / dramatics) — events, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below. `pay.account` is blank until you add it |
+| **Event popup** (workshop / dramatics) — events, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below. `pay.account` is filled in (2026-10-04) |
 | Ticker couplets | `BAYAAN.ticker` |
 | Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
@@ -247,9 +247,9 @@ and is shown in a highlighted box in the popup.
 two sessions: *Asian Style of Debating* and *Public Speaking*. Both are listed in the
 popup and in the confirmation email.
 
-⚠️ While `pay.account` is blank the popup says payment details will appear shortly, so
-nobody can pay yet — fill `pay.account` (and `method`, `title`, `fee`) in as soon as you
-have them.
+**Payment details** (set 2026-10-04): fee PKR 200, account title *M. Umais*, number
+*+92 307 6537688*, method *NayaPay* (shown as the "Send to" row). If `pay.account` is ever blanked the
+popup says payment details will appear shortly.
 
 **Still not built:** a "thank you — verification in progress" email sent the moment someone
 submits. (Held back on purpose: the public form can name any address, so an automatic
