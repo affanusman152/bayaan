@@ -41,12 +41,14 @@ const BAYAAN = {
       account: "+92 307 6537688",  // account / IBAN / wallet number
       fee:     "PKR 200"
     },
-    /* `includes` — what one registration covers; shown in the popup.
+    /* `includes` — what one registration covers; shown in the popup and on the
+       home-page ticket. `perk` — one line of small print on that ticket.
        `hidden: true` — keeps an event defined (the admin board still shows its
        name on old rows) but out of the popup and the pill. Drop the flag to open it. */
     list: [
       { key: "workshop",  name: "Workshop",  ur: "ورکشاپ",
-        includes: ["Asian Style of Debating", "Public Speaking"] },
+        includes: ["Asian Style of Debating", "Public Speaking"],
+        perk: "Certificate for every participant" },
       { key: "dramatics", name: "Dramatics", ur: "ڈرامہ", hidden: true }
     ]
   },

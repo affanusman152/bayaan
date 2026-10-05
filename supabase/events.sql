@@ -63,6 +63,13 @@ create trigger event_registrations_stamp
   before update on public.event_registrations
   for each row execute function public.event_registrations_stamp();
 
+-- class section (e.g. BCS-4A), added after launch. Nullable so the rows taken
+-- before it existed stay valid; the form itself requires it.
+alter table public.event_registrations add column if not exists section text;
+alter table public.event_registrations drop constraint if exists ev_section_len;
+alter table public.event_registrations
+  add constraint ev_section_len check (section is null or char_length(trim(section)) between 1 and 20);
+
 alter table public.event_registrations enable row level security;
 
 -- ─────────────────────────────────────────────────────────────────────
@@ -70,7 +77,7 @@ alter table public.event_registrations enable row level security;
 -- ─────────────────────────────────────────────────────────────────────
 revoke all on public.event_registrations from anon, authenticated;
 
-grant insert (event, full_name, roll_no, email, proof_path)
+grant insert (event, full_name, roll_no, section, email, proof_path)
   on public.event_registrations to anon, authenticated;
 
 grant select on public.event_registrations to authenticated;

@@ -169,9 +169,10 @@
   text-transform: uppercase;
   white-space: nowrap;
   box-shadow: var(--shadow-gold), 0 10px 30px -10px rgba(0,0,0,.8);
-  transition: transform .35s var(--e-ink);
+  transition: transform .35s var(--e-ink), opacity .35s;
 }
 .evpill[hidden] { display: none; }
+.evpill.is-away { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(14px); }
 .evpill:hover  { transform: translateX(-50%) translateY(-2px); }
 .evpill:active { transform: translateX(-50%) scale(.96); }
 /* no popup while the curtain is mid-wipe, and none under the open drawer */
@@ -179,4 +180,233 @@ body.is-booting .evpill, body.is-locked .evpill { opacity: 0; pointer-events: no
 
 @media (prefers-reduced-motion: reduce) {
   .evm__live i, .evpill i { animation: none; }
+}
+
+/* ══════════════ THE OTHER DOORS IN ══════════════
+   Top-bar button · hero chip · drawer item · home-page ticket. All carry
+   [data-ev-open] and stay hidden until js/events.js switches them on. ───── */
+[data-ev-open][hidden], .evticket[hidden], .drawer__ev[hidden] { display: none !important; }
+
+.evchip i, .topbar__reg i, .evticket__live i, .drawer__ev i {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #E8737A;
+  box-shadow: 0 0 0 0 rgba(232,115,122,.6);
+  animation: evPulse 1.8s infinite;
+}
+
+/* ── top bar: always one tap away, on every screen ── */
+.topbar__right { display: flex; align-items: center; gap: .55rem; }
+.topbar__reg {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .95rem;
+  border: 1px solid var(--gold-deep);
+  border-radius: 999px;
+  background: rgba(227,167,47,.1);
+  color: var(--gold-lite);
+  font-family: var(--f-display);
+  font-size: .86rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background .3s, color .3s, transform .35s var(--e-ink), border-color .3s;
+}
+.topbar__reg:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); transform: translateY(-1px); }
+.topbar__reg:hover i { background: var(--maroon); }
+.topbar__reg:active { transform: scale(.95); }
+
+/* ── hero chip: the first thing under the logo ── */
+.evchip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  padding: .4rem .4rem .4rem .95rem;
+  border: 1px solid var(--gold-deep);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(124,15,20,.55), rgba(78,5,9,.55));
+  color: var(--cream);
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-align: left;
+  overflow: hidden;
+  transition: transform .35s var(--e-ink), border-color .3s;
+}
+.evchip span { min-width: 0; line-height: 1.25; }
+.evchip b {
+  flex: none;
+  padding: .42rem .8rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold) 45%, var(--gold-lite));
+  color: var(--ink);
+  font-family: var(--f-display);
+  font-size: .82rem;
+  font-weight: 400;
+  letter-spacing: .14em;
+  white-space: nowrap;
+}
+.evchip::after, .evpill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(246,214,138,.38) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: evSheen 5s var(--e-glide) 1.4s infinite;
+  pointer-events: none;
+}
+@keyframes evSheen { 0%, 62% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.evchip:hover { transform: translateY(-2px); border-color: var(--gold); }
+.evchip:active { transform: scale(.97); }
+.evpill { overflow: hidden; }
+.evpill::after { background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.5) 50%, transparent 62%); }
+
+/* ── drawer: sits under the six pages as the one thing to do ── */
+.drawer__ev { margin-top: .7rem; }
+.drawer__ev a {
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--r);
+  padding: .6rem .9rem;
+  background: linear-gradient(100deg, rgba(227,167,47,.16), rgba(227,167,47,.04));
+}
+.drawer__ev em { display: inline-flex; align-items: center; align-self: center; }
+.drawer__ev span { color: var(--gold-lite); font-size: clamp(1.45rem, 6vw, 1.9rem); }
+.drawer__ev u { opacity: 1; transform: none; color: var(--cream-dim); }
+
+/* ── the ticket ── */
+.evticket {
+  position: relative;
+  display: grid;
+  width: min(calc(100% - 2 * var(--gut)), 980px);
+  margin: var(--stack) auto;
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(124,15,20,.55), transparent 65%),
+    var(--ink-2);
+  box-shadow: var(--shadow), var(--shadow-gold);
+  overflow: hidden;
+  isolation: isolate;
+}
+.evticket::after {                                  /* a slow gold glint across the card */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 40%, rgba(246,214,138,.08) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: evSheen 7s var(--e-glide) 2s infinite;
+  pointer-events: none;
+}
+.evticket__main { padding: clamp(1.4rem, 4vw, 2.4rem); }
+.evticket__live {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  font-family: var(--f-display);
+  font-size: .8rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.evticket__title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .2rem 1rem;
+  margin-top: .5rem;
+  font-family: var(--f-display);
+  font-size: clamp(2.8rem, 9vw, 5rem);
+  font-weight: 400;
+  line-height: .95;
+  letter-spacing: .03em;
+  color: var(--cream);
+}
+.evticket__title u {
+  text-decoration: none;
+  font-family: var(--f-urdu);
+  font-size: .42em;
+  letter-spacing: 0;
+  color: var(--gold);
+}
+.evticket__tracks { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; list-style: none; padding: 0; }
+.evticket__tracks li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .6rem;
+  padding: .55rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(10,6,7,.4);
+  font-size: var(--t-base);
+  color: var(--cream);
+}
+.evticket__tracks em { font-style: normal; font-family: var(--f-display); font-size: .8rem; letter-spacing: .14em; color: var(--gold); }
+.evticket__perk { margin-top: 1rem; font-size: var(--t-sm); color: var(--cream-dim); }
+.evticket__perk:empty { display: none; }
+.evticket__perk::before { content: "★"; margin-right: .5rem; color: var(--gold); }
+
+/* the stub: torn off along a dashed perforation, with a notch at each end */
+.evticket__stub {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: .55rem;
+  padding: clamp(1.4rem, 4vw, 2rem);
+  border-top: 2px dashed var(--line);
+  background: rgba(124,15,20,.16);
+  text-align: center;
+}
+.evticket__stub::before, .evticket__stub::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 22px; height: 22px;
+  border: 1px solid var(--gold-deep);
+  border-radius: 50%;
+  background: var(--ink);
+}
+.evticket__stub::before { left: -12px; }
+.evticket__stub::after  { right: -12px; }
+.evticket__admit {
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.evticket__fee {
+  font-family: var(--f-display);
+  font-size: clamp(2.2rem, 6vw, 3rem);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--gold-lite);
+}
+.evticket__stub small { font-size: var(--t-xs); color: var(--muted); }
+
+@media (min-width: 720px) {
+  .evticket { grid-template-columns: 1fr auto; }
+  .evticket__stub { min-width: 15rem; border-top: 0; border-left: 2px dashed var(--line); }
+  .evticket__stub::before, .evticket__stub::after { left: -12px; right: auto; }
+  .evticket__stub::before { top: -12px; }
+  .evticket__stub::after  { top: auto; bottom: -12px; }
+}
+
+/* the entries belong to the page, not the intro curtain or the open drawer */
+body.is-booting .topbar__reg { pointer-events: none; }
+
+@media (max-width: 430px) {
+  .topbar__reg { padding: .45rem .75rem; font-size: .8rem; letter-spacing: .12em; }
+  .brand__text i { display: none; }                 /* make room for the Register button */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evchip i, .topbar__reg i, .evticket__live i, .drawer__ev i { animation: none; }
+  .evchip::after, .evpill::after, .evticket::after { animation: none; display: none; }
 }

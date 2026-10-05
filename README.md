@@ -218,11 +218,24 @@ public form.
 A popup that opens on its own when the site loads — after the intro curtain clears,
 once per visit — and stays reachable from a gold **Register** pill at the foot of the
 screen. The visitor picks an event, reads where to send the money, and submits **name,
-roll number, email and a screenshot of the payment**. One event per submission; someone
+roll number, class section (e.g. BCS-4A), email and a screenshot of the payment**. One event per submission; someone
 doing both submits twice (the popup offers "Register another").
 
 It is **not shown to anyone who has already registered** from that browser, and nobody
 sees it twice in the same visit. Both are remembered in browser storage.
+
+**Ways in (all driven by `BAYAAN.events` — `open: false` removes every one of them):**
+- the popup itself on first load;
+- a gold **Register** button in the top bar, on every page;
+- a "workshop registration open · fee" chip at the top of the home hero;
+- a **ticket card** under the home-page ticker (event name, what it covers, `perk`, fee, button);
+- a **Workshop** item in the side drawer;
+- the floating pill — only after scrolling past the hero, and not while the ticket is in view.
+
+Any element with `data-ev-open` opens the popup. A **shareable link**, `…/?register` (or
+`…/#/register`), opens it even for a browser that has already seen it or registered — use that
+one when testing or in posts. Handy for you: your own test browser remembers that it registered,
+so the plain link will not pop up for you again.
 
 ### Switching it on
 1. Supabase is already configured (see **Registrations**), and `schema.sql` has been run.
@@ -230,6 +243,12 @@ sees it twice in the same visit. Both are remembered in browser storage.
    `event_registrations` and a **private** `payment-proofs` storage bucket. Safe to re-run.
    ✅ *Already applied to the live project on 2026-10-01 as the migration
    `event_registrations_and_payment_proofs`, and the permissions were tested against it.*
+   ⚠️ **The `section` column (added 2026-10-04) must be applied to the live DB *before* the
+   updated site is deployed** — until it exists, every submission fails. Re-run `events.sql`,
+   or just run: `alter table public.event_registrations add column if not exists section text;`
+   `grant insert (section) on public.event_registrations to anon, authenticated;` (the table
+   grant is column-level, so the grant is what lets the form write it). Older rows have no
+   section and show "—" in the admin Events tab.
 3. Fill in `BAYAAN.events.pay` in `js/data.js` — `account` (and, if you like, `method`,
    `title`, `fee`). Anything left blank is simply not shown; with `account` blank the popup
    says payment details will appear shortly.

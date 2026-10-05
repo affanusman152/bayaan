@@ -16,7 +16,10 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
 - Content: `js/data.js` (council, ventures, wings, `BAYAAN.events`). Council photos: `assets/team/`.
 - Induction form: `js/join.js` → table `registrations` (`supabase/schema.sql`).
 - **Event popup** (opens on load, once per visit): `js/events.js`, `css/events.css`, `supabase/events.sql` → table `event_registrations`
-  + private `payment-proofs` bucket. `BAYAAN.events.list[].hidden` keeps an event out of the popup; `includes` lists what one registration covers.
+  + private `payment-proofs` bucket. `BAYAAN.events.list[].hidden` keeps an event out of the popup; `includes` lists what one registration covers; `perk` is the ticket's small print.
+  Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot.
+  Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
+  `/?register` or `/#/register` force-opens it even for a browser that already registered.
 - **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link) / Broadcast.
 - **Broadcasts** (`supabase/broadcasts.sql`): admin queues a message or certificates for an event; the Apps Script sends it. The page never sends mail.
 - **Mailer**: `automation/confirmation-emails.gs` — Google Apps Script run from the society Gmail on a 5-minute timer (`tick`):

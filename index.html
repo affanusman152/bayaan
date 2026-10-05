@@ -63,9 +63,16 @@
     </span>
   </a>
 
-  <button class="burger" id="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="drawer">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="topbar__right">
+    <!-- event entry points (every [data-ev-open]) stay hidden until js/events.js
+         confirms registrations are open, so switching `open` off clears them all -->
+    <button class="topbar__reg" type="button" data-ev-open hidden>
+      <i aria-hidden="true"></i><span>Register</span>
+    </button>
+    <button class="burger" id="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="drawer">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </header>
 
 <div class="scrollnib" id="scrollnib" aria-hidden="true"><i></i></div>
@@ -90,6 +97,7 @@
     <li style="--i:3"><a href="#/ventures" data-link><em>04</em><span>Ventures</span><u>سرگرمیاں</u></a></li>
     <li style="--i:4"><a href="#/team"     data-link><em>05</em><span>Council '26</span><u>کونسل</u></a></li>
     <li style="--i:5"><a href="#/join"     data-link><em>06</em><span>Join Bayaan</span><u>شمولیت</u></a></li>
+    <li style="--i:6" class="drawer__ev" hidden><a href="#register" data-ev-open><em><i aria-hidden="true"></i></em><span id="drawerEvName">Workshop</span><u>رجسٹریشن</u></a></li>
   </ul>
 
   <div class="drawer__foot">
@@ -104,7 +112,7 @@
         <span>Instagram</span>
       </a>
       <a class="drawer__link drawer__link--gold" href="#/join" data-link>
-        <span>Register</span>
+        <span>Join Us</span>
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M5 12h13M12.5 6l6 6-6 6"/>
         </svg>
@@ -122,6 +130,12 @@
 
       <!-- type field: owns the upper zone outright, so nothing ever sets on a face -->
       <div class="hero__type">
+        <button class="evchip" type="button" data-ev-open hidden data-reveal="up" style="--d:0">
+          <i aria-hidden="true"></i>
+          <span id="evChipTxt">Registration open</span>
+          <b>Register&nbsp;&rarr;</b>
+        </button>
+
         <p class="hero__eyebrow" data-reveal="up" style="--d:0">
           <i></i> Literary &amp; Public Speaking Society
         </p>
@@ -172,6 +186,22 @@
     <div class="ticker" aria-hidden="true">
       <div class="ticker__row" id="tickerRow"></div>
     </div>
+
+    <!-- the event ticket — filled from BAYAAN.events by js/events.js -->
+    <section class="evticket" id="evTicket" aria-label="Event registration" hidden data-reveal="up">
+      <div class="evticket__main">
+        <p class="evticket__live"><i aria-hidden="true"></i> Registrations open now</p>
+        <h2 class="evticket__title"><span id="evtName">Workshop</span><u id="evtUr"></u></h2>
+        <ul class="evticket__tracks" id="evtTracks"></ul>
+        <p class="evticket__perk" id="evtPerk"></p>
+      </div>
+      <div class="evticket__stub">
+        <span class="evticket__admit">Admit one</span>
+        <b class="evticket__fee" id="evtFee"></b>
+        <button class="btn btn--gold" type="button" data-ev-open data-magnetic><span>Register now</span></button>
+        <small>Takes a minute · pay, upload, done</small>
+      </div>
+    </section>
   </section>
 
   <!-- ───────── ABOUT ───────── -->
@@ -427,6 +457,12 @@
         <span class="fld__label">Roll number <i>*</i></span>
         <input class="fld__in" name="roll_no" type="text" required maxlength="24" placeholder="25M-0524" />
         <em class="fld__err" id="ev_err_roll_no"></em>
+      </label>
+
+      <label class="fld">
+        <span class="fld__label">Section <i>*</i></span>
+        <input class="fld__in" name="section" type="text" required maxlength="20" placeholder="BCS-4A" />
+        <em class="fld__err" id="ev_err_section"></em>
       </label>
 
       <label class="fld">

@@ -63,15 +63,16 @@
       empty:    'No event registrations yet. If you expected some, check that you have run ' +
                 'supabase/events.sql and that your account is in the admins table.',
       statuses: ['pending', 'verified', 'rejected'],
-      headers:  ['', 'Received', 'Name', 'Roll', 'Email', 'Event', 'Payment', 'Status'],
-      csv:      ['created_at', 'event', 'full_name', 'roll_no', 'email', 'status',
+      headers:  ['', 'Received', 'Name', 'Roll', 'Section', 'Email', 'Event', 'Payment', 'Status'],
+      csv:      ['created_at', 'event', 'full_name', 'roll_no', 'section', 'email', 'status',
                  'verified_at', 'confirmation_sent_at', 'notes'],
-      haystack: (r) => [r.full_name, r.roll_no, r.email, eventName(r.event), r.status],
+      haystack: (r) => [r.full_name, r.roll_no, r.section, r.email, eventName(r.event), r.status],
       cells: (r) =>
         '<td><button class="ad__more" type="button" aria-label="Show details">+</button></td>' +
         '<td class="ad__dim">' + esc(when(r.created_at)) + '</td>' +
         '<td><b>' + esc(r.full_name) + '</b></td>' +
         '<td class="ad__mono">' + esc(r.roll_no) + '</td>' +
+        '<td class="ad__mono">' + esc(r.section || '—') + '</td>' +
         '<td><a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a></td>' +
         '<td><span class="ad__tag">' + esc(eventName(r.event)) + '</span></td>' +
         '<td><button class="ad__btn ad__btn--ghost ad__proof" type="button" data-path="' + esc(r.proof_path) + '">View screenshot</button></td>',
@@ -207,7 +208,7 @@
         '<td><select class="ad__st ad__st--' + esc(r.status) + '" data-id="' + r.id + '">' + opts + '</select></td>' +
       '</tr>' +
       '<tr class="ad__detail" data-for="' + r.id + '" hidden>' +
-        '<td colspan="8"><div class="ad__detail-grid">' + V().detail(r) + '</div></td>' +
+        '<td colspan="' + V().headers.length + '"><div class="ad__detail-grid">' + V().detail(r) + '</div></td>' +
       '</tr>';
     }).join('');
   }

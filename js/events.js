@@ -1,7 +1,7 @@
 /* ══════════════ EVENTS — the registration popup ══════════════
    Pops up when the site opens (once per visit, and never again for someone who
    has already registered) and stays reachable from a small pill. Name, roll
-   number, email and a payment screenshot go straight to Supabase: the image to
+   number, section, email and a payment screenshot go straight to Supabase: the image to
    a private bucket, the rest to `event_registrations`. As with the join form,
    validation here is courtesy — the database and the bucket re-check it all
    (supabase/events.sql). ─────────────────────────────────────────────────── */
@@ -65,7 +65,38 @@ const Events = (() => {
 
     pill.querySelector('span').textContent =
       'Register · ' + LIST.map(e => e.name).join(' & ');
+
+    paintEntries();
   }
+
+  /* ── the other doors in ──
+     Everything marked [data-ev-open] (top-bar button, hero chip, drawer item,
+     the home-page ticket) is hidden in the markup and switched on here, so
+     `open: false` in data.js clears every one of them along with the popup. */
+  function paintEntries() {
+    const names = LIST.map(e => e.name).join(' & ');
+    const fee = (cfg.pay || {}).fee;
+    const tracks = LIST.flatMap(e => e.includes || []);
+
+    $('evChipTxt').textContent = `${names} registration open` + (fee ? ` · ${fee}` : '');
+    $('drawerEvName').textContent = names;
+
+    $('evtName').textContent = names;
+    $('evtUr').textContent = LIST.length === 1 ? (LIST[0].ur || '') : '';
+    $('evtTracks').innerHTML = tracks.map((t, i) =>
+      `<li><em>${String(i + 1).padStart(2, '0')}</em>${esc(t)}</li>`).join('');
+    $('evtPerk').textContent = LIST.map(e => e.perk).filter(Boolean).join(' · ');
+    $('evtFee').textContent = fee || '';
+    $('evtFee').hidden = !fee;
+
+    document.querySelectorAll('[data-ev-open]').forEach(el => { el.hidden = false; });
+    $('evTicket').hidden = false;
+    document.querySelector('.drawer__ev').hidden = false;
+  }
+
+  /* a link someone can share: /?register or /#/register opens the form even for a
+     browser that has already seen it or already registered */
+  const wantsForm = () => /[?&]register\b/.test(location.search) || /^#\/?register/.test(location.hash);
 
   /* "your registration covers…" — follows whichever event is selected */
   function paintIncludes() {
@@ -126,6 +157,7 @@ const Events = (() => {
       setErr('event',     form.elements.event.value ? '' : 'Pick an event.'),
       setErr('full_name', val('full_name').length < 2 ? 'Please tell us your name.' : ''),
       setErr('roll_no',   val('roll_no').length   < 3 ? 'Your roll number, e.g. 25M-0524.' : ''),
+      setErr('section',   val('section').length   < 1 ? 'Your section, e.g. BCS-4A.' : ''),
       setErr('email',     /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('email')) ? '' : 'That email does not look right.'),
       setErr('proof',     fileMsg)
     ].every(Boolean) ? file : null;
@@ -167,6 +199,7 @@ const Events = (() => {
         event:      form.elements.event.value,
         full_name:  val('full_name'),
         roll_no:    val('roll_no'),
+        section:    val('section'),
         email:      val('email').toLowerCase(),
         proof_path: path
       });
@@ -196,6 +229,30 @@ const Events = (() => {
     modal.addEventListener('click', (e) => { if (e.target.closest('[data-ev-close]')) close(); });
     pill.addEventListener('click', open);
     form.addEventListener('submit', submit);
+
+    /* every other door: the top-bar button, hero chip, drawer item and ticket.
+       From the drawer, let it slide shut first so the two never fight over focus. */
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-ev-open]')) return;
+      e.preventDefault();
+      if (typeof Drawer !== 'undefined' && Drawer.isOpen) { Drawer.close(); setTimeout(open, 320); }
+      else open();
+    });
+    addEventListener('hashchange', () => { if (wantsForm()) open(); });
+
+    /* the pill is the fallback door: the top bar slides away on scroll, so it
+       steps in once the hero chip is behind us, and steps back while the ticket
+       itself is on screen — no point offering the same button twice */
+    let ticketInView = false, ticking = false;
+    const placePill = () => {
+      ticking = false;
+      pill.classList.toggle('is-away', scrollY < 420 || ticketInView);
+    };
+    new IntersectionObserver(([en]) => { ticketInView = en.isIntersecting; placePill(); })
+      .observe($('evTicket'));
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(placePill); } }, { passive: true });
+    addEventListener('hashchange', placePill);
+    placePill();
 
     /* a friend sharing the same phone, or one person doing both events */
     $('evAgain').addEventListener('click', () => {
@@ -233,9 +290,10 @@ const Events = (() => {
     });
 
     /* pop up once the intro curtain has cleared — not for someone who has already
-       registered, and not twice in the same visit */
+       registered, and not twice in the same visit. A shared /?register link
+       overrides both. */
     document.addEventListener('bayaan:ready', () => {
-      if (store('sessionStorage', SEEN) || store('localStorage', DONE)) return;
+      if (!wantsForm() && (store('sessionStorage', SEEN) || store('localStorage', DONE))) return;
       setTimeout(open, 500);
     }, { once: true });
   }
