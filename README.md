@@ -218,7 +218,7 @@ public form.
 A popup that opens on its own when the site loads — after the intro curtain clears,
 once per visit — and stays reachable from a gold **Register** pill at the foot of the
 screen. The visitor picks an event, reads where to send the money, and submits **name,
-roll number, class section (e.g. BCS-4A), email and a screenshot of the payment**. One event per submission; someone
+roll number, class section (e.g. BCS-3A), email and a screenshot of the payment**. One event per submission; someone
 doing both submits twice (the popup offers "Register another").
 
 It is **not shown to anyone who has already registered** from that browser, and nobody

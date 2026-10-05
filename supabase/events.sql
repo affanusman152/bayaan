@@ -63,7 +63,7 @@ create trigger event_registrations_stamp
   before update on public.event_registrations
   for each row execute function public.event_registrations_stamp();
 
--- class section (e.g. BCS-4A), added after launch. Nullable so the rows taken
+-- class section (e.g. BCS-3A), added after launch. Nullable so the rows taken
 -- before it existed stay valid; the form itself requires it.
 alter table public.event_registrations add column if not exists section text;
 alter table public.event_registrations drop constraint if exists ev_section_len;

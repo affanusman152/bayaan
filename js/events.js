@@ -157,7 +157,7 @@ const Events = (() => {
       setErr('event',     form.elements.event.value ? '' : 'Pick an event.'),
       setErr('full_name', val('full_name').length < 2 ? 'Please tell us your name.' : ''),
       setErr('roll_no',   val('roll_no').length   < 3 ? 'Your roll number, e.g. 25M-0524.' : ''),
-      setErr('section',   val('section').length   < 1 ? 'Your section, e.g. BCS-4A.' : ''),
+      setErr('section',   val('section').length   < 1 ? 'Your section, e.g. BCS-3A.' : ''),
       setErr('email',     /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('email')) ? '' : 'That email does not look right.'),
       setErr('proof',     fileMsg)
     ].every(Boolean) ? file : null;
