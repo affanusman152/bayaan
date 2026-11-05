@@ -66,12 +66,13 @@ const BAYAAN = {
     open: true,
     key: "bzu-mun",                       // stored on every row; a new MUN gets a new key
     name: "BZU MUN",
-    /* `group: false` — everyone registers and pays for THEMSELVES; the council
-       builds the delegation from the list (decided 2026-11-05: most people don't
-       know each other). `true` brings back the delegation-head form (add
-       delegates, one payment for all). The database takes either. */
-    group: false,
-    blurb: "Register yourself for Bayaan's delegation: fill in your details, pick your committees, pay the fee and upload the screenshot. We'll build the delegation and assign committees.",
+    /* `group` — how people register (the database takes all three):
+       "choose" — the page asks: Individually (just you, your own fee; Bayaan FAST
+                  places you in a delegation) or As a delegation (a head adds
+                  the group and pays for everyone). Starts on Individually.
+       false    — individual only.   true — delegation-head only. */
+    group: "choose",
+    blurb: "Register on your own or as a delegation: fill in the details, pick committees, pay the fee and upload the screenshot.",
     fee: 1000,                            // PKR per delegate
     regular: "External delegates: PKR 1,500 each + PKR 400 delegation fee",
     maxDelegates: 30,                     // the database also stops at 30

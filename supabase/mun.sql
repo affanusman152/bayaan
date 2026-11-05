@@ -5,10 +5,10 @@
 --  Run once, whole, in the Supabase SQL editor. Safe to re-run.
 --
 --  The form is mun.html — NOT linked from the site, reached only through its
---  link. With BAYAAN.mun.group = false (BZU MUN) each person registers and pays
---  for themselves and is stored as a delegation of ONE; the council builds the
---  real delegation. With group = true a head enters every member (themselves
---  first) and uploads ONE screenshot of the whole payment. Same tables either way.
+--  link. People register INDIVIDUALLY (stored as a delegation of ONE; the council
+--  places them in a Bayaan FAST delegation) or AS A DELEGATION (a head enters every
+--  member, themselves first, and uploads ONE screenshot of the whole payment) —
+--  see BAYAAN.mun.group in js/data.js. Same tables either way.
 -- ═══════════════════════════════════════════════════════════════════════
 
 -- ─────────────────────────────────────────────────────────────────────

@@ -393,16 +393,22 @@ for **BZU MUN** (November 2026). It is **not linked anywhere on the site** and i
 share the link, `https://bayaan-iota.vercel.app/mun.html`, with the people you want to send.
 (Anyone who has the link can still submit — the council verifies every payment anyway.)
 
-**Two modes — `BAYAAN.mun.group`.**
-* **`false` — individual (the BZU MUN setting, since 2026-11-05).** Most people going don't
-  know each other, so **each person registers and pays for themselves**: name, roll number,
-  section, email, WhatsApp number, up to three committee preferences (the 1st is required) and
-  prior MUN experience (first MUN / 1–2 / 3 or more), PKR 1,000 and their own screenshot.
-  The **council builds the delegation and assigns committees** from the list. In the database
-  each person is simply a delegation of one.
-* **`true` — delegation head.** One person fills in a card per delegate, **themselves first**
-  (up to 30), a live line shows *delegates × fee = total*, and they pay the total **in one
-  transfer** with **one** screenshot.
+**Individually or as a delegation — `BAYAAN.mun.group`.** The BZU MUN setting is
+**`"choose"`** (since 2026-11-05): the page opens with *How are you registering?* and two
+options, starting on the first.
+* **Individually** — just you, your own PKR 1,000 and your own screenshot. The page says:
+  *"Registering individually means we'll assign you to a delegation sent by Bayaan FAST."*
+  Most people going don't know each other, so this is the main route; the **council builds the
+  delegations and assigns committees** from the list. In the database each person is simply a
+  delegation of one.
+* **As a delegation** — a head fills in a card per delegate, **themselves first** (up to 30),
+  a live line shows *delegates × fee = total*, and they pay the total **in one transfer** with
+  **one** screenshot. Switching back to *Individually* keeps only the first card (it asks
+  first if other members were typed in).
+
+`group: false` locks the page to individual only (no picker); `group: true` to delegation only.
+Every card asks: name, roll number, section, email, WhatsApp number, up to three committee
+preferences (the 1st is required) and prior MUN experience (first MUN / 1–2 / 3 or more).
 
 Either way, what is typed is kept in the browser until it is sent, so a refresh loses nothing.
 

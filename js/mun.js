@@ -1,8 +1,12 @@
-/* ══════════════ MUN — the delegation form (mun.html) ══════════════
-   One delegation head fills in every member, themselves first, then uploads ONE
-   screenshot of the whole payment (delegates × BAYAAN.mun.fee). The image goes to
-   the private `payment-proofs` bucket under mun/, and the delegation + members are
-   written together by submit_mun_delegation() (supabase/mun.sql), which re-checks
+/* ══════════════ MUN — the registration form (mun.html) ══════════════
+   Two ways in, picked at the top of the page (BAYAAN.mun.group = "choose"):
+   · Individually — one person, their own fee; the council places them in a
+     delegation sent by Bayaan FAST (stored as a delegation of one).
+   · As a delegation — a head fills in every member, themselves first, and uploads
+     ONE screenshot of the whole payment (delegates × BAYAAN.mun.fee).
+   group: false / true locks the page to one of them. The image goes to the private
+   `payment-proofs` bucket under mun/, and the delegation + members are written
+   together by submit_mun_delegation() (supabase/mun.sql), which re-checks
    everything — validation here is courtesy. The page is reached only by its link.
    ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -19,13 +23,17 @@
 
   const form = $('munForm'), list = $('munList'), status = $('munStatus'), send = $('munSend');
   const FEE = Number(cfg.fee) || 0;
-  /* group: false → one person registers and pays for themselves (the database
-     stores them as a delegation of one); the council builds the real delegation */
-  const GROUP = cfg.group === true;
-  const MAX_N = GROUP ? Math.min(Number(cfg.maxDelegates) || 30, 30) : 1;   // the database stops at 30
-  const SEND_TXT = GROUP ? 'Send delegation' : 'Send registration';
   const COMMITTEES = (cfg.committees || []).filter(Boolean);
   const DRAFT = 'bayaan.mun.draft.' + cfg.key;
+  const MODE = DRAFT + '.mode';
+
+  /* individual vs delegation. "choose" lets the visitor pick (individual first —
+     most people going don't know each other); true / false locks one mode. */
+  const CHOOSE = cfg.group === 'choose';
+  let GROUP = cfg.group === true ||
+              (CHOOSE && (() => { try { return localStorage.getItem(MODE) === 'group'; } catch { return false; } })());
+  const maxN = () => GROUP ? Math.min(Number(cfg.maxDelegates) || 30, 30) : 1;   // the database stops at 30
+  const sendTxt = () => GROUP ? 'Send delegation' : 'Send registration';
 
   const TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
   const MAX_BYTES = 5 * 1024 * 1024;                                  // mirrors the bucket's own limit
@@ -45,7 +53,7 @@
   const load = () => {
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT) || 'null');
-      if (Array.isArray(d) && d.length) return d.slice(0, MAX_N).map(x => ({ ...blank(), ...x }));
+      if (Array.isArray(d) && d.length) return d.slice(0, maxN()).map(x => ({ ...blank(), ...x }));
     } catch { /* a broken draft is just discarded */ }
     return [blank()];
   };
@@ -53,13 +61,11 @@
   const save = () => { try { localStorage.setItem(DRAFT, JSON.stringify(people)); } catch { /* private mode */ } };
 
   /* ── paint the fixed parts ── */
-  $('munTitle').textContent = (cfg.name || 'MUN') + (GROUP ? ' — delegation' : ' — registration');
+  const locked = cfg.group === true ? ' — delegation' : ' — registration';
+  $('munTitle').textContent = (cfg.name || 'MUN') + locked;
   $('munSub').textContent = cfg.blurb || '';
-  document.title = (cfg.name || 'MUN') + (GROUP ? ' delegation' : ' registration') + ' — Bayaan';
-  $('munLive').textContent = GROUP ? 'Delegation registration' : "Join Bayaan's delegation";
-  $('munDoneHead').textContent = GROUP ? 'Delegation received.' : 'Registration received.';
-  $('munAgain').querySelector('span').textContent = GROUP ? 'Register another delegation' : 'Register someone else';
-  send.querySelector('span').textContent = SEND_TXT;
+  document.title = (cfg.name || 'MUN') + locked.replace(' — ', ' ') + ' — Bayaan';
+  $('munModeWrap').hidden = !CHOOSE;
   $('munFee').innerHTML =
     '<p class="mun__fee-main"><b>' + esc(pkr(FEE)) + '</b> per delegate</p>' +
     '<p class="mun__fee-perk">No delegation fee</p>' +
@@ -136,9 +142,45 @@
   }
 
   function paint() {
+    paintMode();
     list.innerHTML = people.map((_, i) => card(i)).join('');
     paintTotal();
   }
+
+  /* everything whose wording depends on individual vs delegation */
+  function paintMode() {
+    $('munLive').textContent = GROUP ? 'Delegation registration' : "Join Bayaan's delegation";
+    $('munDoneHead').textContent = GROUP ? 'Delegation received.' : 'Registration received.';
+    $('munAgain').querySelector('span').textContent = GROUP ? 'Register another delegation' : 'Register someone else';
+    if (!send.disabled) send.querySelector('span').textContent = sendTxt();
+    if (CHOOSE) {
+      form.querySelector('input[name="mode"][value="' + (GROUP ? 'group' : 'solo') + '"]').checked = true;
+      $('munModeNote').textContent = GROUP
+        ? 'You are the delegation head: add each member below, yourself first, and pay for everyone in one transfer.'
+        : 'Registering individually means we’ll assign you to a delegation sent by Bayaan FAST.';
+    }
+  }
+
+  /* switching modes. Going back to "individually" keeps only the first card,
+     so ask before throwing away members someone has already typed in. */
+  $('munModeWrap').addEventListener('change', (e) => {
+    if (e.target.name !== 'mode') return;
+    const toGroup = e.target.value === 'group';
+    if (toGroup === GROUP) return;
+    if (!toGroup && people.length > 1) {
+      const named = people.slice(1).filter(d => d.full_name.trim()).length;
+      if (named && !confirm('Registering individually keeps only your own details. Remove the other ' +
+                            (people.length - 1) + ' delegate' + (people.length === 2 ? '' : 's') + '?')) {
+        paintMode();                                    // put the radio back
+        return;
+      }
+      people = people.slice(0, 1);
+    }
+    GROUP = toGroup;
+    try { localStorage.setItem(MODE, GROUP ? 'group' : 'solo'); } catch { /* private mode */ }
+    save();
+    paint();
+  });
 
   function paintTotal() {
     const n = people.length;
@@ -146,7 +188,7 @@
       ? n + ' delegate' + (n === 1 ? '' : 's') + ' × ' + esc(pkr(FEE)) +
         ' = <b>' + esc(pkr(n * FEE)) + '</b><span>Send this amount in one transfer.</span>'
       : 'Your fee <b>' + esc(pkr(FEE)) + '</b><span>Send it to the account below, then attach the screenshot.</span>';
-    $('munAdd').hidden = n >= MAX_N;
+    $('munAdd').hidden = n >= maxN();
     document.querySelector('.mun__draft').hidden = !GROUP;
     $('munAdd').querySelector('span').textContent = '+ Add a delegate (' + (n + 1) + ')';
   }
@@ -164,7 +206,7 @@
   }
 
   $('munAdd').addEventListener('click', () => {
-    if (people.length >= MAX_N) return;
+    if (people.length >= maxN()) return;
     people.push(blank());
     save();
     paint();
@@ -266,7 +308,7 @@
       finish();
     } catch (err) {
       send.disabled = false;
-      send.querySelector('span').textContent = SEND_TXT;
+      send.querySelector('span').textContent = sendTxt();
       status.className = 'reg__status is-bad';
       /* the database's own messages name the roll number at fault; anything else gets the generic line */
       status.textContent = (err.status === 409 || err.status === 400) && /roll number|screenshot|delegat/i.test(err.message)
@@ -282,7 +324,7 @@
       ? n + ' delegate' + (n === 1 ? '' : 's') + ' · ' + pkr(n * FEE) + '. ' +
         'The society will check the payment and get in touch with you on WhatsApp.'
       : pkr(FEE) + '. We’ll check your payment, then message you on WhatsApp with your committee and delegation details.';
-    try { localStorage.removeItem(DRAFT); } catch { /* fine */ }
+    try { localStorage.removeItem(DRAFT); localStorage.removeItem(MODE); } catch { /* fine */ }
     form.hidden = true;
     $('munDone').hidden = false;
     $('munDone').focus();
@@ -292,10 +334,10 @@
   $('munAgain').addEventListener('click', () => {
     people = [blank()];
     uploaded = null;
+    if (CHOOSE) GROUP = false;          // the next person starts from "individually" again
     form.reset();
     status.textContent = '';
     send.disabled = false;
-    send.querySelector('span').textContent = SEND_TXT;
     paint();
     $('munDone').hidden = true;
     form.hidden = false;

@@ -85,6 +85,19 @@ select.fld__in { appearance: auto; }
 
 @media (min-width: 560px) { .mun__exp { grid-template-columns: repeat(3, 1fr); } }
 
+/* ── individually / as a delegation ── */
+@media (min-width: 560px) { .mun__modepick { grid-template-columns: 1fr 1fr; } }
+.mun__modetxt { display: grid; gap: .1rem; }
+.mun__modetxt small { font-size: var(--t-xs); color: var(--muted); }
+.mun__modenote {
+  padding: .75rem 1rem;
+  border-left: 2px solid var(--gold);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: rgba(124,15,20,.22);
+  font-size: var(--t-sm);
+  color: var(--cream);
+}
+
 .mun__add { justify-self: start; }
 .mun__draft { margin-top: -.8rem; font-size: var(--t-xs); color: var(--muted); }
 

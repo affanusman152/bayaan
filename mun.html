@@ -49,6 +49,24 @@
     <div class="mun__fee" id="munFee"></div>
 
     <form class="mun__form" id="munForm" novalidate>
+      <!-- individual vs delegation — shown when BAYAAN.mun.group is "choose" -->
+      <fieldset class="reg__wings mun__mode" id="munModeWrap" hidden>
+        <legend>How are you registering? <i>*</i></legend>
+        <div class="wingpick mun__modepick">
+          <label class="wingpick__opt">
+            <input type="radio" name="mode" value="solo" checked />
+            <span class="wingpick__box" aria-hidden="true"></span>
+            <span class="mun__modetxt"><span class="wingpick__name">Individually</span><small>Just you · your own fee</small></span>
+          </label>
+          <label class="wingpick__opt">
+            <input type="radio" name="mode" value="group" />
+            <span class="wingpick__box" aria-hidden="true"></span>
+            <span class="mun__modetxt"><span class="wingpick__name">As a delegation</span><small>Your group · one payment for all</small></span>
+          </label>
+        </div>
+        <p class="mun__modenote" id="munModeNote" aria-live="polite"></p>
+      </fieldset>
+
       <div class="mun__list" id="munList"></div>
 
       <button class="btn btn--ghost mun__add" type="button" id="munAdd">
