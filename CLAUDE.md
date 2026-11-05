@@ -21,7 +21,9 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
 - **MUN delegation form** `mun.html` + `js/mun.js` + `css/mun.css` — link-only (not linked from the site, noindex).
-  Head enters every delegate (self first), one screenshot for delegates × fee. Config `BAYAAN.mun` (BZU MUN: PKR 1,000/delegate,
+  `BAYAAN.mun.group: false` (BZU MUN, since 2026-11-05) = each person registers + pays for themselves and the council builds
+  the delegation / assigns committees; `true` = a head enters every delegate, one screenshot for delegates × fee. Same DB either way
+  (individual = a delegation of one). Admin MUN tab tallies 1st choices per committee. Config `BAYAAN.mun` (BZU MUN: PKR 1,000/delegate,
   no delegation fee, pay Imran Sarwar 0300 6395670 JazzCash; committees UNSC/UNGA/UNW/PNA/UNICEF as dropdowns).
   Live link: https://bayaan-iota.vercel.app/mun.html (applied by the user in the SQL editor 2026-11-05). DB `supabase/mun.sql`: `mun_delegations` + `mun_delegates`, written ONLY via
   the security-definer RPC `submit_mun_delegation()` (atomic; the real fee `v_fee` lives there — keep `BAYAAN.mun.fee` in step).

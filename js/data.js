@@ -66,7 +66,12 @@ const BAYAAN = {
     open: true,
     key: "bzu-mun",                       // stored on every row; a new MUN gets a new key
     name: "BZU MUN",
-    blurb: "For the delegation head: add every delegate — yourself first — then pay the total in one transfer and upload the screenshot.",
+    /* `group: false` — everyone registers and pays for THEMSELVES; the council
+       builds the delegation from the list (decided 2026-11-05: most people don't
+       know each other). `true` brings back the delegation-head form (add
+       delegates, one payment for all). The database takes either. */
+    group: false,
+    blurb: "Register yourself for Bayaan's delegation: fill in your details, pick your committees, pay the fee and upload the screenshot. We'll build the delegation and assign committees.",
     fee: 1000,                            // PKR per delegate
     regular: "External delegates: PKR 1,500 each + PKR 400 delegation fee",
     maxDelegates: 30,                     // the database also stops at 30

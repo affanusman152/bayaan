@@ -82,16 +82,17 @@
         '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
     },
 
-    /* one row per delegation (mun.html); its members come embedded through the
-       foreign key and are listed when the row is expanded. Verifying a row
-       verifies the whole delegation's single payment. */
+    /* one row per submission (mun.html); its members come embedded through the
+       foreign key and are listed when the row is expanded. With BAYAAN.mun.group
+       false (the BZU MUN setting) every row is one person who paid for themselves;
+       verifying a row verifies that submission's single payment. */
     mun: {
       table:    'mun_delegations',
       query:    'select=*,mun_delegates(*)&order=created_at.desc',
       empty:    'No delegations yet. If you expected some, check that supabase/mun.sql has been ' +
                 'run and that your account is in the admins table.',
       statuses: ['pending', 'verified', 'rejected'],
-      headers:  ['', 'Received', 'Head', 'Contact', 'Delegates', 'Total', 'Payment', 'Status'],
+      headers:  ['', 'Received', 'Name', 'Contact', 'Delegates', 'Total', 'Payment', 'Status'],
       haystack: (r) => [r.head_name, r.head_email, r.head_phone, r.conference, r.status]
         .concat(members(r).flatMap(m => [m.full_name, m.roll_no, m.section, m.committee_1, m.committee_2, m.committee_3])),
       cells: (r) =>
@@ -254,6 +255,18 @@
     count.textContent = list.length === all.length
       ? all.length + ' total'
       : list.length + ' of ' + all.length;
+
+    /* MUN: the council assigns committees, so show how the 1st choices fall
+       across everyone listed (not rejected) — the imbalance is what needs fixing */
+    if (view === 'mun') {
+      const tally = {};
+      list.filter(r => r.status !== 'rejected').forEach(r => members(r).forEach(m => {
+        tally[m.committee_1] = (tally[m.committee_1] || 0) + 1;
+      }));
+      const order = ((BAYAAN.mun && BAYAAN.mun.committees) || []).concat(Object.keys(tally));
+      const parts = [...new Set(order)].filter(c => tally[c]).map(c => c + ' ' + tally[c]);
+      if (parts.length) count.textContent += ' · 1st choices: ' + parts.join(' · ');
+    }
 
     rows.innerHTML = list.map(r => {
       const opts = V().statuses.map(s =>

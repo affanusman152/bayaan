@@ -123,7 +123,7 @@ its internal geometry.
 ```
 index.html          all six screens, in order
 admin.html          the registrations board — Induction, Events, MUN and Broadcast tabs (noindex, not linked from the site)
-mun.html            the MUN delegation form — reached ONLY by its link (noindex, not linked from the site)
+mun.html            the MUN registration form (individual or delegation-head) — reached ONLY by its link (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
 supabase/schema.sql the induction tables and row-level-security rules — run this once
 supabase/events.sql the event-registration table + private screenshot bucket — run after schema.sql
@@ -390,23 +390,36 @@ registrants per event per run.
 
 A separate page for sending a Bayaan delegation to another university's MUN, first used
 for **BZU MUN** (November 2026). It is **not linked anywhere on the site** and is `noindex`;
-share the link, `https://bayaan-iota.vercel.app/mun.html`, with delegation heads only.
+share the link, `https://bayaan-iota.vercel.app/mun.html`, with the people you want to send.
 (Anyone who has the link can still submit — the council verifies every payment anyway.)
 
-**How it works.** The delegation head fills in one card per delegate, **themselves first**:
-name, roll number, section, email, WhatsApp number, up to three committee preferences
-(the 1st is required) and prior MUN experience (first MUN / 1–2 / 3 or more). A live line
-shows *delegates × fee = total*; the head pays that total **in one transfer** and uploads
-**one** screenshot. Up to 30 delegates. What they type is kept in the browser until it is
-sent, so a refresh loses nothing.
+**Two modes — `BAYAAN.mun.group`.**
+* **`false` — individual (the BZU MUN setting, since 2026-11-05).** Most people going don't
+  know each other, so **each person registers and pays for themselves**: name, roll number,
+  section, email, WhatsApp number, up to three committee preferences (the 1st is required) and
+  prior MUN experience (first MUN / 1–2 / 3 or more), PKR 1,000 and their own screenshot.
+  The **council builds the delegation and assigns committees** from the list. In the database
+  each person is simply a delegation of one.
+* **`true` — delegation head.** One person fills in a card per delegate, **themselves first**
+  (up to 30), a live line shows *delegates × fee = total*, and they pay the total **in one
+  transfer** with **one** screenshot.
+
+Either way, what is typed is kept in the browser until it is sent, so a refresh loses nothing.
+
+**Committees in one delegation.** A delegation is the group from one university, *not* a group
+inside one committee: members are normally spread across committees, each representing a
+different country or seat (several in a big committee like UNGA is fine). Ask the organisers
+how many from one university may sit in the same committee, and whether they allow double
+delegations.
 
 **BZU MUN pricing.** External delegates normally pay PKR 1,500 each plus a PKR 400
 delegation fee; Bayaan's delegation pays **PKR 1,000 per delegate and no delegation fee**.
 Payment goes to **Imran Sarwar, 0300 6395670, JazzCash**.
 
 **Settings — `BAYAAN.mun` in `js/data.js`:** `open`, `key` (stored on every row —
-`"bzu-mun"`; the next MUN gets a new key, no migration), `name`, `blurb`, `fee`, `regular`
-(the struck-through normal price), `maxDelegates`, `committees`, `pay`.
+`"bzu-mun"`; the next MUN gets a new key, no migration), `group` (see above), `name`, `blurb`,
+`fee`, `regular` (the struck-through normal price), `maxDelegates` (group mode only),
+`committees`, `pay`.
 * **`committees`** — BZU MUN's five: **UNSC, UNGA, UNW, PNA, UNICEF** (set 2026-11-05). The three
   preference boxes are dropdowns of these. Empty the list and they fall back to free text.
 * **The fee is set in two places on purpose:** `fee` in `data.js` is only what the page
@@ -424,13 +437,16 @@ saved, never half a delegation. A student can be in **only one delegation per co
 the existing private `payment-proofs` bucket under `mun/`, and the function refuses a
 screenshot path that was never uploaded or is already used.
 
-**Verifying — the MUN tab on `/admin.html`.** One row per delegation: head, contact (the
-number opens WhatsApp), delegate count, total, *View screenshot*, status. Expand a row
-(`+`) to see every member and their committee choices; search matches any member's name or
-roll number. Marking a delegation `verified` verifies the whole group's single payment.
-**Export CSV** on this tab gives **one line per delegate** — the list to hand the organisers.
+**Verifying — the MUN tab on `/admin.html`.** One row per submission (in individual mode, one
+per person): name, contact (the number opens WhatsApp), delegate count, total,
+*View screenshot*, status. Expand a row (`+`) to see the member(s) and their committee
+choices; search matches any member's name or roll number. Marking a row `verified` verifies
+that submission's payment. The count line also tallies **1st choices per committee** across
+everyone not rejected (e.g. `UNSC 7 · UNGA 2 · …`) — that imbalance is what the council
+evens out when it assigns committees. **Export CSV** gives **one line per delegate** — the
+list to hand the organisers.
 
-**No email** is sent for MUN delegations (decided 2026-11-04); the head is contacted directly.
+**No email** is sent for MUN registrations (decided 2026-11-04); people are contacted on WhatsApp.
 The Broadcast tab and the Apps Script do not touch these tables.
 
 ## Deploying

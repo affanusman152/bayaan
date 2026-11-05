@@ -19,7 +19,11 @@
 
   const form = $('munForm'), list = $('munList'), status = $('munStatus'), send = $('munSend');
   const FEE = Number(cfg.fee) || 0;
-  const MAX_N = Math.min(Number(cfg.maxDelegates) || 30, 30);        // the database stops at 30
+  /* group: false → one person registers and pays for themselves (the database
+     stores them as a delegation of one); the council builds the real delegation */
+  const GROUP = cfg.group === true;
+  const MAX_N = GROUP ? Math.min(Number(cfg.maxDelegates) || 30, 30) : 1;   // the database stops at 30
+  const SEND_TXT = GROUP ? 'Send delegation' : 'Send registration';
   const COMMITTEES = (cfg.committees || []).filter(Boolean);
   const DRAFT = 'bayaan.mun.draft.' + cfg.key;
 
@@ -49,9 +53,13 @@
   const save = () => { try { localStorage.setItem(DRAFT, JSON.stringify(people)); } catch { /* private mode */ } };
 
   /* ── paint the fixed parts ── */
-  $('munTitle').textContent = (cfg.name || 'MUN') + ' — delegation';
+  $('munTitle').textContent = (cfg.name || 'MUN') + (GROUP ? ' — delegation' : ' — registration');
   $('munSub').textContent = cfg.blurb || '';
-  document.title = (cfg.name || 'MUN') + ' delegation — Bayaan';
+  document.title = (cfg.name || 'MUN') + (GROUP ? ' delegation' : ' registration') + ' — Bayaan';
+  $('munLive').textContent = GROUP ? 'Delegation registration' : "Join Bayaan's delegation";
+  $('munDoneHead').textContent = GROUP ? 'Delegation received.' : 'Registration received.';
+  $('munAgain').querySelector('span').textContent = GROUP ? 'Register another delegation' : 'Register someone else';
+  send.querySelector('span').textContent = SEND_TXT;
   $('munFee').innerHTML =
     '<p class="mun__fee-main"><b>' + esc(pkr(FEE)) + '</b> per delegate</p>' +
     '<p class="mun__fee-perk">No delegation fee</p>' +
@@ -96,7 +104,7 @@
     const exp = people[i].experience;
     return '<section class="mun__card" data-card="' + i + '" aria-labelledby="munCard' + i + '">' +
       '<header class="mun__cardhead">' +
-        '<h3 id="munCard' + i + '"><em>' + two(i) + '</em> ' + (head ? 'You — delegation head' : 'Delegate') + '</h3>' +
+        '<h3 id="munCard' + i + '">' + (GROUP ? '<em>' + two(i) + '</em> ' + (head ? 'You — delegation head' : 'Delegate') : 'Your details') + '</h3>' +
         (head ? '' : '<button class="mun__rm" type="button" data-rm="' + i + '" aria-label="Remove delegate ' + two(i) + '">Remove</button>') +
       '</header>' +
       '<div class="reg__grid">' +
@@ -105,7 +113,8 @@
         field(i, 'section', 'Section', 'type="text" maxlength="20" placeholder="BCS-3A"') +
         field(i, 'email', 'Email', 'type="email" maxlength="120"' + (head ? ' autocomplete="email"' : '')) +
         field(i, 'phone', 'WhatsApp number', 'type="tel" maxlength="24" placeholder="03xx-xxxxxxx"' + (head ? ' autocomplete="tel"' : ''),
-              { hint: head ? 'The society contacts the delegation through you.' : '' }) +
+              { hint: !GROUP ? 'We’ll reach you here with your committee and travel details.'
+                             : head ? 'The society contacts the delegation through you.' : '' }) +
       '</div>' +
       '<fieldset class="reg__wings mun__prefs">' +
         '<legend>Committee preference</legend>' +
@@ -133,9 +142,12 @@
 
   function paintTotal() {
     const n = people.length;
-    $('munTotal').innerHTML = n + ' delegate' + (n === 1 ? '' : 's') + ' × ' + esc(pkr(FEE)) +
-      ' = <b>' + esc(pkr(n * FEE)) + '</b><span>Send this amount in one transfer.</span>';
+    $('munTotal').innerHTML = GROUP
+      ? n + ' delegate' + (n === 1 ? '' : 's') + ' × ' + esc(pkr(FEE)) +
+        ' = <b>' + esc(pkr(n * FEE)) + '</b><span>Send this amount in one transfer.</span>'
+      : 'Your fee <b>' + esc(pkr(FEE)) + '</b><span>Send it to the account below, then attach the screenshot.</span>';
     $('munAdd').hidden = n >= MAX_N;
+    document.querySelector('.mun__draft').hidden = !GROUP;
     $('munAdd').querySelector('span').textContent = '+ Add a delegate (' + (n + 1) + ')';
   }
 
@@ -254,7 +266,7 @@
       finish();
     } catch (err) {
       send.disabled = false;
-      send.querySelector('span').textContent = 'Send delegation';
+      send.querySelector('span').textContent = SEND_TXT;
       status.className = 'reg__status is-bad';
       /* the database's own messages name the roll number at fault; anything else gets the generic line */
       status.textContent = (err.status === 409 || err.status === 400) && /roll number|screenshot|delegat/i.test(err.message)
@@ -266,9 +278,10 @@
 
   function finish() {
     const n = people.length;
-    $('munDoneNote').textContent =
-      n + ' delegate' + (n === 1 ? '' : 's') + ' · ' + pkr(n * FEE) + '. ' +
-      'The society will check the payment and get in touch with you on WhatsApp.';
+    $('munDoneNote').textContent = GROUP
+      ? n + ' delegate' + (n === 1 ? '' : 's') + ' · ' + pkr(n * FEE) + '. ' +
+        'The society will check the payment and get in touch with you on WhatsApp.'
+      : pkr(FEE) + '. We’ll check your payment, then message you on WhatsApp with your committee and delegation details.';
     try { localStorage.removeItem(DRAFT); } catch { /* fine */ }
     form.hidden = true;
     $('munDone').hidden = false;
@@ -282,7 +295,7 @@
     form.reset();
     status.textContent = '';
     send.disabled = false;
-    send.querySelector('span').textContent = 'Send delegation';
+    send.querySelector('span').textContent = SEND_TXT;
     paint();
     $('munDone').hidden = true;
     form.hidden = false;
