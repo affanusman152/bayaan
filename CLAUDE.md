@@ -22,7 +22,8 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
 - **MUN delegation form** `mun.html` + `js/mun.js` + `css/mun.css` — link-only (not linked from the site, noindex).
   Head enters every delegate (self first), one screenshot for delegates × fee. Config `BAYAAN.mun` (BZU MUN: PKR 1,000/delegate,
-  no delegation fee, pay Imran Sarwar 0300 6395670). DB `supabase/mun.sql`: `mun_delegations` + `mun_delegates`, written ONLY via
+  no delegation fee, pay Imran Sarwar 0300 6395670 JazzCash; committees UNSC/UNGA/UNW/PNA/UNICEF as dropdowns).
+  Live link: https://bayaan-iota.vercel.app/mun.html (applied by the user in the SQL editor 2026-11-05). DB `supabase/mun.sql`: `mun_delegations` + `mun_delegates`, written ONLY via
   the security-definer RPC `submit_mun_delegation()` (atomic; the real fee `v_fee` lives there — keep `BAYAAN.mun.fee` in step).
   One delegation per roll number per conference. Screenshots in `payment-proofs/mun/`. No email for MUN (decided 2026-11-04).
 - **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link) / MUN (delegations, expand for members, CSV = one line per delegate) / Broadcast.

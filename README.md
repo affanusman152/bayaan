@@ -402,13 +402,13 @@ sent, so a refresh loses nothing.
 
 **BZU MUN pricing.** External delegates normally pay PKR 1,500 each plus a PKR 400
 delegation fee; Bayaan's delegation pays **PKR 1,000 per delegate and no delegation fee**.
-Payment goes to **Imran Sarwar, 0300 6395670** (`pay.method` is blank, so no "Send to" row).
+Payment goes to **Imran Sarwar, 0300 6395670, JazzCash**.
 
 **Settings — `BAYAAN.mun` in `js/data.js`:** `open`, `key` (stored on every row —
 `"bzu-mun"`; the next MUN gets a new key, no migration), `name`, `blurb`, `fee`, `regular`
 (the struck-through normal price), `maxDelegates`, `committees`, `pay`.
-* **`committees`** is empty for now, so the preference boxes are free text. Fill it with the
-  conference's committee names (e.g. `["UNSC", "UNGA", "WHO"]`) and they become dropdowns.
+* **`committees`** — BZU MUN's five: **UNSC, UNGA, UNW, PNA, UNICEF** (set 2026-11-05). The three
+  preference boxes are dropdowns of these. Empty the list and they fall back to free text.
 * **The fee is set in two places on purpose:** `fee` in `data.js` is only what the page
   shows; the amount actually recorded comes from `v_fee` inside `submit_mun_delegation()` in
   `supabase/mun.sql`. Change both together.

@@ -70,9 +70,9 @@ const BAYAAN = {
     fee: 1000,                            // PKR per delegate
     regular: "External delegates: PKR 1,500 each + PKR 400 delegation fee",
     maxDelegates: 30,                     // the database also stops at 30
-    committees: [],
+    committees: ["UNSC", "UNGA", "UNW", "PNA", "UNICEF"],   // BZU MUN, given 2026-11-05
     pay: {
-      method:  "",                        // e.g. "JazzCash" / "Easypaisa" — blank = not shown
+      method:  "JazzCash",                // blank = no "Send to" row
       title:   "Imran Sarwar",
       account: "0300 6395670"
     }
