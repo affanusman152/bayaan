@@ -93,6 +93,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 |---|---|
 | Registration form | it posts to Supabase — see **Registrations** below |
 | **Event popup** (workshop / dramatics) — events, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below. `pay.account` is filled in (2026-10-04) |
+| **MUN delegation form** (`mun.html`, link-only) — conference, fee, account, committees, on/off | `BAYAAN.mun` — see **MUN delegations** below |
 | Ticker couplets | `BAYAAN.ticker` |
 | Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
 | Ventures — **add freely, the list is meant to grow** | `BAYAAN.ventures` — set `flagship: true` on one to pull it out as the main-event card, and `ur` for its Urdu title |
@@ -121,11 +122,13 @@ its internal geometry.
 
 ```
 index.html          all six screens, in order
-admin.html          the registrations board — Induction, Events and Broadcast tabs (noindex, not linked from the site)
+admin.html          the registrations board — Induction, Events, MUN and Broadcast tabs (noindex, not linked from the site)
+mun.html            the MUN delegation form — reached ONLY by its link (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
 supabase/schema.sql the induction tables and row-level-security rules — run this once
 supabase/events.sql the event-registration table + private screenshot bucket — run after schema.sql
 supabase/broadcasts.sql the broadcast queue + per-person delivery log — run after events.sql
+supabase/mun.sql    MUN delegations + their delegates, and the submit function — run after events.sql
 css/tokens.css      colour · type · spacing · easing curves
 css/base.css        reset + grain/vignette/aura ambience
 css/logo.css        every placement of the mark, in one file
@@ -135,14 +138,16 @@ css/motion.css      reveal utilities + screen enter/exit
 automation/confirmation-emails.gs  Google Apps Script (runs on Google, not on the site) — confirmations, announcements, certificates
 css/events.css      the event popup and its "Register" pill
 css/admin.css       the board — dense and plain, palette only
+css/mun.css         the delegation page's layout (fields and buttons are the site's own)
 js/data.js          ← content lives here, plus the two Supabase values
 js/logo.js          loads the mark, keys out the black, fits it to the mask
 js/motion.js        reveal engine, counters, parallax, magnetics
 js/render.js        data → DOM
-js/supabase.js      ~80 lines of fetch (REST + storage) — no SDK, no build step
+js/supabase.js      ~120 lines of fetch (REST, one RPC call, storage) — no SDK, no build step
 js/join.js          the induction registration form
 js/events.js        the event popup: auto-open, validation, screenshot upload, submit
-js/admin.js         sign-in, both tables (Induction / Events), triage, screenshot viewer, CSV export, the Broadcast tab
+js/mun.js           the delegation form: add/remove delegates, live total, saved draft, upload, submit
+js/admin.js         sign-in, the Induction / Events / MUN tables, triage, screenshot viewer, CSV export, the Broadcast tab
 js/drawer.js        drawer + focus trap + swipe gestures
 js/router.js        hash routing + the curtain transition
 js/intro.js         the intro — reuses the router's curtain
@@ -380,6 +385,53 @@ registrants per event per run.
   `js/join.js`. Every rule is also a database constraint, and that is the one that counts.
 * **Applicants' phone numbers and emails are personal data.** Only add people to `admins`
   who should see them, and prefer CSV exports over screenshots in group chats.
+
+## MUN delegations (`mun.html`)
+
+A separate page for sending a Bayaan delegation to another university's MUN, first used
+for **BZU MUN** (November 2026). It is **not linked anywhere on the site** and is `noindex`;
+share the link, `https://bayaan-iota.vercel.app/mun.html`, with delegation heads only.
+(Anyone who has the link can still submit — the council verifies every payment anyway.)
+
+**How it works.** The delegation head fills in one card per delegate, **themselves first**:
+name, roll number, section, email, WhatsApp number, up to three committee preferences
+(the 1st is required) and prior MUN experience (first MUN / 1–2 / 3 or more). A live line
+shows *delegates × fee = total*; the head pays that total **in one transfer** and uploads
+**one** screenshot. Up to 30 delegates. What they type is kept in the browser until it is
+sent, so a refresh loses nothing.
+
+**BZU MUN pricing.** External delegates normally pay PKR 1,500 each plus a PKR 400
+delegation fee; Bayaan's delegation pays **PKR 1,000 per delegate and no delegation fee**.
+Payment goes to **Imran Sarwar, 0300 6395670** (`pay.method` is blank, so no "Send to" row).
+
+**Settings — `BAYAAN.mun` in `js/data.js`:** `open`, `key` (stored on every row —
+`"bzu-mun"`; the next MUN gets a new key, no migration), `name`, `blurb`, `fee`, `regular`
+(the struck-through normal price), `maxDelegates`, `committees`, `pay`.
+* **`committees`** is empty for now, so the preference boxes are free text. Fill it with the
+  conference's committee names (e.g. `["UNSC", "UNGA", "WHO"]`) and they become dropdowns.
+* **The fee is set in two places on purpose:** `fee` in `data.js` is only what the page
+  shows; the amount actually recorded comes from `v_fee` inside `submit_mun_delegation()` in
+  `supabase/mun.sql`. Change both together.
+
+**The database (`supabase/mun.sql`, run after `events.sql`).** Two tables —
+`mun_delegations` (one row per delegation: head's name/email/phone, count, fee, total,
+screenshot path, status) and `mun_delegates` (one row per person, `position` 1 = head).
+The public cannot write to either table directly: the page calls the function
+**`submit_mun_delegation()`**, which checks everything again, works out the total itself,
+and writes the delegation and all its members **in one go** — a bad member means nothing is
+saved, never half a delegation. A student can be in **only one delegation per conference**
+(a unique index); the page says which roll number is already taken. The screenshot goes to
+the existing private `payment-proofs` bucket under `mun/`, and the function refuses a
+screenshot path that was never uploaded or is already used.
+
+**Verifying — the MUN tab on `/admin.html`.** One row per delegation: head, contact (the
+number opens WhatsApp), delegate count, total, *View screenshot*, status. Expand a row
+(`+`) to see every member and their committee choices; search matches any member's name or
+roll number. Marking a delegation `verified` verifies the whole group's single payment.
+**Export CSV** on this tab gives **one line per delegate** — the list to hand the organisers.
+
+**No email** is sent for MUN delegations (decided 2026-11-04); the head is contacted directly.
+The Broadcast tab and the Apps Script do not touch these tables.
 
 ## Deploying
 It's a static site. Drag the folder onto Netlify, or push to GitHub and turn on Pages.

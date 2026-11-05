@@ -1,6 +1,7 @@
 /* ══════════════ ADMIN — the registrations board ══════════════
-   Reads and triages submissions, for two tables: the induction `registrations`
-   and the paid `event_registrations`. Nothing here is a security boundary: the
+   Reads and triages submissions, for three boards: the induction `registrations`,
+   the paid `event_registrations`, and MUN delegations (`mun_delegations` with their
+   `mun_delegates`, from mun.html). Nothing here is a security boundary: the
    database decides what this page may see. An account that signs in but is not
    listed in `admins` gets an empty list, because the RLS policy says so — not
    because this file hid anything. ────────────────────────────────────────── */
@@ -79,8 +80,65 @@
       detail: (r) =>
         '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
         '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
+    },
+
+    /* one row per delegation (mun.html); its members come embedded through the
+       foreign key and are listed when the row is expanded. Verifying a row
+       verifies the whole delegation's single payment. */
+    mun: {
+      table:    'mun_delegations',
+      query:    'select=*,mun_delegates(*)&order=created_at.desc',
+      empty:    'No delegations yet. If you expected some, check that supabase/mun.sql has been ' +
+                'run and that your account is in the admins table.',
+      statuses: ['pending', 'verified', 'rejected'],
+      headers:  ['', 'Received', 'Head', 'Contact', 'Delegates', 'Total', 'Payment', 'Status'],
+      haystack: (r) => [r.head_name, r.head_email, r.head_phone, r.conference, r.status]
+        .concat(members(r).flatMap(m => [m.full_name, m.roll_no, m.section, m.committee_1, m.committee_2, m.committee_3])),
+      cells: (r) =>
+        '<td><button class="ad__more" type="button" aria-label="Show delegates">+</button></td>' +
+        '<td class="ad__dim">' + esc(when(r.created_at)) + '</td>' +
+        '<td><b>' + esc(r.head_name) + '</b><br /><span class="ad__tag">' + esc(munName(r.conference)) + '</span></td>' +
+        '<td>' +
+          '<a href="mailto:' + esc(r.head_email) + '">' + esc(r.head_email) + '</a><br />' +
+          '<a class="ad__dim" href="https://wa.me/' + esc(waNumber(r.head_phone)) + '" target="_blank" rel="noopener">' + esc(r.head_phone) + '</a>' +
+        '</td>' +
+        '<td class="ad__mono">' + esc(r.delegate_count) + '</td>' +
+        '<td class="ad__mono">PKR ' + esc(Number(r.total_pkr).toLocaleString('en-US')) + '</td>' +
+        '<td><button class="ad__btn ad__btn--ghost ad__proof" type="button" data-path="' + esc(r.proof_path) + '">View screenshot</button></td>',
+      detail: (r) =>
+        '<div class="ad__wide"><table class="ad__sub">' +
+          '<thead><tr><th>#</th><th>Name</th><th>Roll</th><th>Section</th><th>Email</th><th>WhatsApp</th><th>Committees (1st · 2nd · 3rd)</th><th>MUN exp.</th></tr></thead>' +
+          '<tbody>' + members(r).map(m =>
+            '<tr>' +
+              '<td class="ad__mono">' + esc(m.position) + '</td>' +
+              '<td><b>' + esc(m.full_name) + '</b></td>' +
+              '<td class="ad__mono">' + esc(m.roll_no) + '</td>' +
+              '<td class="ad__mono">' + esc(m.section) + '</td>' +
+              '<td><a href="mailto:' + esc(m.email) + '">' + esc(m.email) + '</a></td>' +
+              '<td class="ad__mono">' + esc(m.phone) + '</td>' +
+              '<td>' + esc([m.committee_1, m.committee_2, m.committee_3].filter(Boolean).join(' · ')) + '</td>' +
+              '<td class="ad__dim">' + esc(EXP[m.experience] || m.experience) + '</td>' +
+            '</tr>').join('') +
+          '</tbody></table></div>' +
+        '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
+        '<div><h4>Fee recorded</h4><p>' + esc(r.delegate_count + ' × PKR ' + Number(r.fee_per_delegate).toLocaleString('en-US')) + '</p></div>',
+      /* the export is one line per DELEGATE — the list you hand the organisers */
+      flatten: (list) => list.flatMap(r => members(r).map(m => ({
+        delegation_received: r.created_at, delegation_status: r.status, head: r.head_name,
+        position: m.position, full_name: m.full_name, roll_no: m.roll_no, section: m.section,
+        email: m.email, phone: m.phone, committee_1: m.committee_1, committee_2: m.committee_2,
+        committee_3: m.committee_3, experience: EXP[m.experience] || m.experience
+      }))),
+      csv:      ['delegation_received', 'delegation_status', 'head', 'position', 'full_name', 'roll_no',
+                 'section', 'email', 'phone', 'committee_1', 'committee_2', 'committee_3', 'experience']
     }
   };
+
+  const EXP = { 'none': 'First MUN', '1-2': '1–2 before', '3+': '3 or more' };
+  const members = (r) => (r.mun_delegates || []).slice().sort((a, b) => a.position - b.position);
+  const munName = (key) => ((BAYAAN.mun && BAYAAN.mun.key === key) ? BAYAAN.mun.name : key);
+  /* 0300-1234567 → 923001234567, the form wa.me wants */
+  const waNumber = (p = '') => { const d = String(p).replace(/\D/g, ''); return d.startsWith('0') ? '92' + d.slice(1) : d; };
 
   const V = () => VIEWS[view];
 
@@ -157,7 +215,7 @@
     const asked = view;
     note.textContent = 'Loading…';
     try {
-      const data = await SB.select(V().table, 'select=*&order=created_at.desc');
+      const data = await SB.select(V().table, V().query || 'select=*&order=created_at.desc');
       if (asked !== view) return;                 // they switched tabs mid-flight
       all = data;
       note.textContent = '';
@@ -408,8 +466,9 @@
       return '"' + s.replace(/"/g, '""') + '"';
     };
 
+    const out = V().flatten ? V().flatten(visible()) : visible();
     const csv = [cols.join(',')]
-      .concat(visible().map(r => cols.map(c => cell(r[c])).join(',')))
+      .concat(out.map(r => cols.map(c => cell(r[c])).join(',')))
       .join('\r\n');
 
     const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));

@@ -20,7 +20,12 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
-- **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link) / Broadcast.
+- **MUN delegation form** `mun.html` + `js/mun.js` + `css/mun.css` — link-only (not linked from the site, noindex).
+  Head enters every delegate (self first), one screenshot for delegates × fee. Config `BAYAAN.mun` (BZU MUN: PKR 1,000/delegate,
+  no delegation fee, pay Imran Sarwar 0300 6395670). DB `supabase/mun.sql`: `mun_delegations` + `mun_delegates`, written ONLY via
+  the security-definer RPC `submit_mun_delegation()` (atomic; the real fee `v_fee` lives there — keep `BAYAAN.mun.fee` in step).
+  One delegation per roll number per conference. Screenshots in `payment-proofs/mun/`. No email for MUN (decided 2026-11-04).
+- **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link) / MUN (delegations, expand for members, CSV = one line per delegate) / Broadcast.
 - **Broadcasts** (`supabase/broadcasts.sql`): admin queues a message or certificates for an event; the Apps Script sends it. The page never sends mail.
 - **Mailer**: `automation/confirmation-emails.gs` — Google Apps Script run from the society Gmail on a 5-minute timer (`tick`):
   1. emails "Registration successful" to `verified` rows not yet stamped `confirmation_sent_at`;

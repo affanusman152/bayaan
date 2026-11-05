@@ -1,0 +1,105 @@
+/* ══════════════ MUN — the delegation form (mun.html) ══════════════
+   Layout only. Fields, buttons, the payment box and the experience picker are
+   the site's own (screens.css, ui.css, events.css), so this page cannot drift
+   from the workshop popup. Palette from tokens.css. */
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+.mun__bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 1rem var(--gut);
+  border-bottom: 1px solid var(--line-soft);
+}
+.mun__brand { display: flex; align-items: center; gap: .7rem; }
+/* the logo art sits on black: screen it onto the dark bar */
+.mun__brand img { width: 34px; height: 34px; object-fit: contain; mix-blend-mode: screen; }
+.mun__brand span { display: grid; line-height: 1.1; }
+.mun__brand b { font-family: var(--f-display); font-weight: 400; font-size: 1rem; letter-spacing: .22em; color: var(--cream); }
+.mun__brand i { font-style: normal; font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+.mun__wrap {
+  position: relative;
+  z-index: 2;
+  width: min(100% - 2 * var(--gut), 820px);
+  margin: 0 auto;
+  padding: clamp(1.8rem, 1rem + 4vw, 3.4rem) 0 5rem;
+}
+
+/* ── the fee — the waiver is the point, so it reads first ── */
+.mun__fee {
+  margin-top: 1.3rem;
+  padding: 1rem 1.15rem;
+  border-left: 2px solid var(--gold);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: rgba(124,15,20,.22);
+  display: grid;
+  gap: .15rem;
+}
+.mun__fee-main { font-size: var(--t-base); color: var(--cream); }
+.mun__fee-main b { font-family: var(--f-display); font-weight: 400; font-size: 1.7rem; letter-spacing: .04em; color: var(--gold-lite); margin-right: .3rem; }
+.mun__fee-perk { font-family: var(--f-display); font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.mun__fee-reg  { font-size: var(--t-xs); color: var(--muted); }
+
+.mun__form { display: grid; gap: 1.4rem; margin-top: 2rem; }
+.mun__list { display: grid; gap: 1.2rem; }
+
+/* ── one delegate ── */
+.mun__card {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.2rem clamp(1rem, .6rem + 2vw, 1.6rem) 1.3rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: rgba(20,11,12,.6);
+}
+.mun__card:first-child { border-color: var(--line); }
+.mun__cardhead { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.mun__cardhead h3 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+.mun__cardhead em { font-style: normal; color: var(--gold); margin-right: .35rem; }
+.mun__rm {
+  padding: .35rem .8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  font-size: var(--t-xs);
+  color: var(--cream-dim);
+  transition: border-color .3s, color .3s, background .3s;
+}
+.mun__rm:hover, .mun__rm:focus-visible { border-color: var(--maroon-hot); color: var(--cream); background: rgba(124,15,20,.35); }
+
+.mun__hint { font-size: var(--t-xs); color: var(--muted); }
+
+.mun__prefgrid { display: grid; gap: 1rem; }
+@media (min-width: 640px) { .mun__prefgrid { grid-template-columns: repeat(3, 1fr); } }
+select.fld__in { appearance: auto; }
+
+@media (min-width: 560px) { .mun__exp { grid-template-columns: repeat(3, 1fr); } }
+
+.mun__add { justify-self: start; }
+.mun__draft { margin-top: -.8rem; font-size: var(--t-xs); color: var(--muted); }
+
+/* ── payment ── */
+.mun__paybox {
+  display: grid;
+  gap: 1rem;
+  padding: 1.3rem clamp(1rem, .6rem + 2vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: rgba(10,6,7,.55);
+}
+.mun__h2 { font-family: var(--f-display); font-weight: 400; font-size: 1.3rem; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); }
+.mun__total { display: grid; gap: .2rem; font-size: var(--t-base); color: var(--cream-dim); }
+.mun__total b { font-family: var(--f-display); font-weight: 400; font-size: 1.6rem; letter-spacing: .04em; color: var(--gold-lite); }
+.mun__total span { font-size: var(--t-xs); color: var(--muted); }
+
+#munDone { margin-top: 2rem; outline: none; }

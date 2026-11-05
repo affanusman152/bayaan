@@ -52,6 +52,18 @@ const SB = (() => {
     if (!res.ok) throw await fail(res);
   }
 
+  /* call a database function as the public (anon). Used by mun.html, whose
+     delegation + members must land together: submit_mun_delegation() writes them
+     in one transaction, so a bad member never leaves half a delegation behind. */
+  async function rpc(fn, args) {
+    const res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: base(),
+      body: JSON.stringify(args)
+    });
+    if (!res.ok) throw await fail(res);
+  }
+
   async function select(table, query = '') {
     const res = await fetch(`${URL}/rest/v1/${table}?${query}`, { headers: auth() });
     if (!res.ok) throw await fail(res);
@@ -104,5 +116,5 @@ const SB = (() => {
 
   function signOut() { session.clear(); }
 
-  return { configured, insert, select, patch, upload, signedUrl, signIn, signOut, session };
+  return { configured, insert, rpc, select, patch, upload, signedUrl, signIn, signOut, session };
 })();

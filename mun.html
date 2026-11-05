@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0A0607" />
+<!-- reached only through its link: not in the site's nav, and kept out of search -->
+<meta name="robots" content="noindex, nofollow" />
+<title>MUN delegation — Bayaan</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+
+<!-- the site's own field, button and payment-box styles, then this page's layout -->
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/ui.css" />
+<link rel="stylesheet" href="css/screens.css" />
+<link rel="stylesheet" href="css/events.css" />
+<link rel="stylesheet" href="css/mun.css" />
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="mun__bar">
+  <a class="mun__brand" href="index.html">
+    <img src="assets/logo.png" alt="" />
+    <span><b>BAYAAN</b><i>Delegation</i></span>
+  </a>
+</header>
+
+<main class="mun__wrap">
+
+  <!-- unconfigured, or BAYAAN.mun.open is false -->
+  <section class="reg__shut" id="munShut" hidden>
+    <p class="reg__shut-head" id="munShutHead">Delegation registration is closed.</p>
+    <p class="reg__shut-note">Questions? Reach the society on
+      <a href="https://instagram.com/bayaan_fast" target="_blank" rel="noopener">Instagram</a>.</p>
+  </section>
+
+  <div id="munMain" hidden>
+    <p class="evm__live"><i></i> Delegation registration</p>
+    <h1 class="evm__title" id="munTitle">MUN</h1>
+    <p class="evm__sub" id="munSub"></p>
+
+    <div class="mun__fee" id="munFee"></div>
+
+    <form class="mun__form" id="munForm" novalidate>
+      <div class="mun__list" id="munList"></div>
+
+      <button class="btn btn--ghost mun__add" type="button" id="munAdd">
+        <span>+ Add a delegate</span>
+      </button>
+      <p class="mun__draft">What you type is kept on this device until you send it, so a refresh loses nothing.</p>
+
+      <section class="mun__paybox" aria-labelledby="munPayHead">
+        <h2 class="mun__h2" id="munPayHead">Payment</h2>
+        <p class="mun__total" id="munTotal" aria-live="polite"></p>
+        <dl class="evm__pay" id="munPay"></dl>
+
+        <label class="fld">
+          <span class="fld__label">Screenshot of the payment <i>*</i></span>
+          <input class="fld__in fld__in--file" name="proof" type="file" accept="image/jpeg,image/png,image/webp" />
+          <em class="fld__err" id="mun_err_proof"></em>
+        </label>
+      </section>
+
+      <!-- honeypot: real people never see this, bots fill it in -->
+      <div class="reg__trap" aria-hidden="true">
+        <label>Leave this field empty
+          <input name="website" type="text" tabindex="-1" autocomplete="off" />
+        </label>
+      </div>
+
+      <button class="btn btn--gold btn--lg reg__send" type="submit" id="munSend">
+        <span>Send delegation</span>
+      </button>
+      <p class="reg__status" id="munStatus" role="status" aria-live="polite"></p>
+    </form>
+
+    <section class="reg__shut" id="munDone" hidden tabindex="-1">
+      <p class="reg__shut-head">Delegation received.</p>
+      <p class="reg__shut-note" id="munDoneNote"></p>
+      <div class="evm__done-actions">
+        <button class="btn btn--ghost" type="button" id="munAgain"><span>Register another delegation</span></button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/mun.js"></script>
+</body>
+</html>

@@ -53,6 +53,31 @@ const BAYAAN = {
     ]
   },
 
+  /* ── MUN delegation form — mun.html ───────────────────
+     NOT linked anywhere on the site: share the link
+     (…/mun.html) with delegation heads only. Needs
+     supabase/mun.sql run first. `open: false` shows a
+     "closed" note instead of the form.
+     `fee` is for display — the amount actually recorded is set
+     inside submit_mun_delegation() in mun.sql. Change both together.
+     `committees`: fill with the conference's committee names to
+     turn the preference boxes into dropdowns; empty = free text. */
+  mun: {
+    open: true,
+    key: "bzu-mun",                       // stored on every row; a new MUN gets a new key
+    name: "BZU MUN",
+    blurb: "For the delegation head: add every delegate — yourself first — then pay the total in one transfer and upload the screenshot.",
+    fee: 1000,                            // PKR per delegate
+    regular: "External delegates: PKR 1,500 each + PKR 400 delegation fee",
+    maxDelegates: 30,                     // the database also stops at 30
+    committees: [],
+    pay: {
+      method:  "",                        // e.g. "JazzCash" / "Easypaisa" — blank = not shown
+      title:   "Imran Sarwar",
+      account: "0300 6395670"
+    }
+  },
+
   /* ── marquee couplets / phrases ───────────────────── */
   ticker: [
     { ur: "نرم دم گفتگو گرم دم جستجو" },
