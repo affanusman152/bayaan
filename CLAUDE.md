@@ -16,8 +16,11 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
 - Content: `js/data.js` (council, ventures, wings, `BAYAAN.events`). Council photos: `assets/team/`.
 - Induction form: `js/join.js` → table `registrations` (`supabase/schema.sql`).
 - **Event popup** (opens on load, once per visit): `js/events.js`, `css/events.css`, `supabase/events.sql` → table `event_registrations`
-  + private `payment-proofs` bucket. `BAYAAN.events.list[].hidden` keeps an event out of the popup; `includes` lists what one registration covers; `perk` is the ticket's small print.
-  Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot.
+  + private `payment-proofs` bucket. `BAYAAN.events.list[].hidden` keeps an event out of the popup; `includes` lists what one registration covers; `perk` is the ticket's small print;
+  `date` shows under the popup title + on the ticket; `committees` makes it MUN-style (adds WhatsApp + 1st/2nd committee dropdowns; ticket lists the committees).
+  Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot;
+  MUN-style events also `phone`, `committee_1`, `committee_2` (columns added 2026-11-21 — same rule: on the live DB before deploying).
+  "Already registered" is stored per set of open events (`bayaan.ev.done.<keys>`), so an old workshop registration doesn't hide a new event's popup.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
 - **MUN delegation form** `mun.html` + `js/mun.js` + `css/mun.css` — link-only (not linked from the site, noindex).
@@ -28,7 +31,7 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   Live link: https://bayaan-iota.vercel.app/mun.html (applied by the user in the SQL editor 2026-11-05). DB `supabase/mun.sql`: `mun_delegations` + `mun_delegates`, written ONLY via
   the security-definer RPC `submit_mun_delegation()` (atomic; the real fee `v_fee` lives there — keep `BAYAAN.mun.fee` in step).
   One delegation per roll number per conference. Screenshots in `payment-proofs/mun/`. No email for MUN (decided 2026-11-04).
-- **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link) / MUN (delegations, expand for members, CSV = one line per delegate) / Broadcast.
+- **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link; Bayaan MUN rows show WhatsApp + committees, count line tallies 1st choices) / MUN (delegations, expand for members, CSV = one line per delegate) / Broadcast.
 - **Broadcasts** (`supabase/broadcasts.sql`): admin queues a message or certificates for an event; the Apps Script sends it. The page never sends mail.
 - **Mailer**: `automation/confirmation-emails.gs` — Google Apps Script run from the society Gmail on a 5-minute timer (`tick`):
   1. emails "Registration successful" to `verified` rows not yet stamped `confirmation_sent_at`;
@@ -36,11 +39,13 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   It is **not deployed by this repo** — the user pastes it into script.google.com (top level, not inside `myFunction`), sets Script Properties
   (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `CERT_TEMPLATE_ID`) and runs `installTrigger` once. **They must re-paste it whenever the file changes.**
 
-- **Posters are NOT in this repo.** Source HTML/PDF lives outside it in `C:/Users/Super/Documents/Bayaan-posters/` and the finished files are published as a claude.ai Artifact (see memory for the link). Workshop fee is PKR 200; site is https://bayaan-iota.vercel.app.
+- **Posters are NOT in this repo.** Source HTML/PDF lives outside it in `C:/Users/Super/Documents/Bayaan-posters/` and the finished files are published as a claude.ai Artifact (see memory for the link). Workshop fee was PKR 200; site is https://bayaan-iota.vercel.app.
 
-## Current state (2026-10-04)
-- Workshop registration is live (covers Asian Style of Debating + Public Speaking); Dramatics is hidden.
-- `BAYAAN.events.pay` filled 2026-10-04: PKR 200, title "M. Umais", account "+92 307 6537688", method "NayaPay" (live).
+## Current state (2026-11-21)
+- Popup is open for **Bayaan MUN** (`bayaan-mun`) — Bayaan's own MUN, Friday 27 Nov 2026, PKR 150 to NayaPay "M. Umais" +92 307 6537688,
+  committees "UNSC (Security Council)" and "PNA" (user didn't recall PNA's full form — don't guess it). Separate from the BZU MUN form (`mun.html`).
+- Workshop is over: `hidden: true`, its rows kept. Dramatics was cancelled (hidden; Bayaan MUN replaced it as the second event).
+- The `.gs` EVENTS block has a `bayaan-mun` entry (when = Fri 27 Nov 2026; time/venue still blank) — user must re-paste the script.
 - Not built on purpose: a "verification in progress" email on submit (public form can name any address → abuse risk; needs a quota guard),
   emails to rejected payments, per-event scripts.
 - Certificates go to **all verified** registrants after the event (no attendance tracking). Needs a Slides template with `{{name}}` → `CERT_TEMPLATE_ID`.

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════
---  BAYAAN — event registrations (workshop + dramatics)
+--  BAYAAN — event registrations (workshop, Bayaan MUN, …)
 --  Run AFTER schema.sql (it reuses public.is_admin()).
 --  Run once, whole, in the Supabase SQL editor. Safe to re-run.
 -- ═══════════════════════════════════════════════════════════════════════
@@ -70,6 +70,23 @@ alter table public.event_registrations drop constraint if exists ev_section_len;
 alter table public.event_registrations
   add constraint ev_section_len check (section is null or char_length(trim(section)) between 1 and 20);
 
+-- WhatsApp + committee preferences, added for Bayaan MUN (27 Nov 2026). Only
+-- events with a `committees` list in BAYAAN.events.list ask for them; every
+-- other event leaves them null, and so do all the rows taken before they existed.
+alter table public.event_registrations add column if not exists phone       text;
+alter table public.event_registrations add column if not exists committee_1 text;
+alter table public.event_registrations add column if not exists committee_2 text;
+alter table public.event_registrations add column if not exists committee_3 text;
+alter table public.event_registrations drop constraint if exists ev_phone_len;
+alter table public.event_registrations
+  add constraint ev_phone_len check (phone is null or char_length(trim(phone)) between 7 and 24);
+alter table public.event_registrations drop constraint if exists ev_committee_len;
+alter table public.event_registrations
+  add constraint ev_committee_len check (
+        (committee_1 is null or char_length(committee_1) <= 60)
+    and (committee_2 is null or char_length(committee_2) <= 60)
+    and (committee_3 is null or char_length(committee_3) <= 60));
+
 alter table public.event_registrations enable row level security;
 
 -- ─────────────────────────────────────────────────────────────────────
@@ -77,7 +94,8 @@ alter table public.event_registrations enable row level security;
 -- ─────────────────────────────────────────────────────────────────────
 revoke all on public.event_registrations from anon, authenticated;
 
-grant insert (event, full_name, roll_no, section, email, proof_path)
+grant insert (event, full_name, roll_no, section, email, proof_path,
+              phone, committee_1, committee_2, committee_3)
   on public.event_registrations to anon, authenticated;
 
 grant select on public.event_registrations to authenticated;

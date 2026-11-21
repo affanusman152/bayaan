@@ -65,9 +65,10 @@
                 'supabase/events.sql and that your account is in the admins table.',
       statuses: ['pending', 'verified', 'rejected'],
       headers:  ['', 'Received', 'Name', 'Roll', 'Section', 'Email', 'Event', 'Payment', 'Status'],
-      csv:      ['created_at', 'event', 'full_name', 'roll_no', 'section', 'email', 'status',
-                 'verified_at', 'confirmation_sent_at', 'notes'],
-      haystack: (r) => [r.full_name, r.roll_no, r.section, r.email, eventName(r.event), r.status],
+      csv:      ['created_at', 'event', 'full_name', 'roll_no', 'section', 'email', 'phone',
+                 'committee_1', 'committee_2', 'status', 'verified_at', 'confirmation_sent_at', 'notes'],
+      haystack: (r) => [r.full_name, r.roll_no, r.section, r.email, r.phone, r.committee_1, r.committee_2,
+                        eventName(r.event), r.status],
       cells: (r) =>
         '<td><button class="ad__more" type="button" aria-label="Show details">+</button></td>' +
         '<td class="ad__dim">' + esc(when(r.created_at)) + '</td>' +
@@ -78,6 +79,13 @@
         '<td><span class="ad__tag">' + esc(eventName(r.event)) + '</span></td>' +
         '<td><button class="ad__btn ad__btn--ghost ad__proof" type="button" data-path="' + esc(r.proof_path) + '">View screenshot</button></td>',
       detail: (r) =>
+        /* MUN-style events (Bayaan MUN) also carry a WhatsApp number and committee choices */
+        (r.phone || r.committee_1
+          ? '<div><h4>WhatsApp</h4><p>' + (r.phone
+              ? '<a href="https://wa.me/' + esc(waNumber(r.phone)) + '" target="_blank" rel="noopener">' + esc(r.phone) + '</a>'
+              : '—') + '</p></div>' +
+            '<div><h4>Committee (1st · 2nd)</h4><p>' + esc([r.committee_1, r.committee_2].filter(Boolean).join(' · ') || '—') + '</p></div>'
+          : '') +
         '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
         '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
     },
@@ -258,12 +266,16 @@
 
     /* MUN: the council assigns committees, so show how the 1st choices fall
        across everyone listed (not rejected) — the imbalance is what needs fixing */
-    if (view === 'mun') {
+    if (view === 'mun' || view === 'events') {
       const tally = {};
-      list.filter(r => r.status !== 'rejected').forEach(r => members(r).forEach(m => {
-        tally[m.committee_1] = (tally[m.committee_1] || 0) + 1;
-      }));
-      const order = ((BAYAAN.mun && BAYAAN.mun.committees) || []).concat(Object.keys(tally));
+      const firsts = view === 'mun'
+        ? list.filter(r => r.status !== 'rejected').flatMap(r => members(r).map(m => m.committee_1))
+        : list.filter(r => r.status !== 'rejected' && r.committee_1).map(r => r.committee_1);   // Bayaan MUN rows
+      firsts.forEach(c => { tally[c] = (tally[c] || 0) + 1; });
+      const known = view === 'mun'
+        ? (BAYAAN.mun && BAYAAN.mun.committees) || []
+        : ((BAYAAN.events && BAYAAN.events.list) || []).flatMap(e => e.committees || []);
+      const order = known.concat(Object.keys(tally));
       const parts = [...new Set(order)].filter(c => tally[c]).map(c => c + ' ' + tally[c]);
       if (parts.length) count.textContent += ' · 1st choices: ' + parts.join(' · ');
     }

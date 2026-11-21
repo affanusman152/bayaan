@@ -24,7 +24,9 @@ const Events = (() => {
   const done = $('evDone'), status = $('evStatus'), send = $('evSend'), picker = $('evPick');
 
   const SEEN = 'bayaan.ev.seen';     // sessionStorage — popped up already this visit
-  const DONE = 'bayaan.ev.done';     // localStorage   — this browser has registered
+  /* localStorage — this browser has registered for THESE events. Keyed by the open
+     events, so registering for the workshop does not hide the next event's popup. */
+  const DONE = 'bayaan.ev.done.' + LIST.map(e => e.key).join('+');
   const store = (area, k, v) => { try { return v === undefined ? window[area].getItem(k) : window[area].setItem(k, v); } catch { return null; } };
 
   const TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -54,7 +56,7 @@ const Events = (() => {
       picker.querySelector('input').checked = true;
       $('evPickWrap').hidden = true;
     }
-    paintIncludes();
+    paintEvent();
 
     const p = cfg.pay || {};
     const rows = [['Fee', p.fee], ['Send to', p.method], ['Account title', p.title], ['Account', p.account]]
@@ -76,7 +78,8 @@ const Events = (() => {
   function paintEntries() {
     const names = LIST.map(e => e.name).join(' & ');
     const fee = (cfg.pay || {}).fee;
-    const tracks = LIST.flatMap(e => e.includes || []);
+    /* the ticket lists what a registration covers — or, for a MUN, its committees */
+    const tracks = LIST.flatMap(e => e.includes || e.committees || []);
 
     $('evChipTxt').textContent = `${names} registration open` + (fee ? ` · ${fee}` : '');
     $('drawerEvName').textContent = names;
@@ -85,7 +88,7 @@ const Events = (() => {
     $('evtUr').textContent = LIST.length === 1 ? (LIST[0].ur || '') : '';
     $('evtTracks').innerHTML = tracks.map((t, i) =>
       `<li><em>${String(i + 1).padStart(2, '0')}</em>${esc(t)}</li>`).join('');
-    $('evtPerk').textContent = LIST.map(e => e.perk).filter(Boolean).join(' · ');
+    $('evtPerk').textContent = LIST.flatMap(e => [e.date, e.perk]).filter(Boolean).join(' · ');
     $('evtFee').textContent = fee || '';
     $('evtFee').hidden = !fee;
 
@@ -98,16 +101,29 @@ const Events = (() => {
      browser that has already seen it or already registered */
   const wantsForm = () => /[?&]register\b/.test(location.search) || /^#\/?register/.test(location.hash);
 
-  /* "your registration covers…" — follows whichever event is selected */
-  function paintIncludes() {
+  const current = () => LIST.find(e => e.key === form.elements.event.value);
+
+  /* everything that follows whichever event is selected: "your registration
+     covers…", the date, and — for a MUN — the WhatsApp + committee fields */
+  function paintEvent() {
+    const ev = current();
     const box = $('evIncl');
-    const ev = LIST.find(e => e.key === form.elements.event.value);
     const items = (ev && ev.includes) || [];
     box.hidden = !items.length;
     box.innerHTML = items.length
       ? `<p class="evm__incl-head">One registration covers ${items.length === 2 ? 'both' : 'all'}</p>
          <ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
       : '';
+
+    $('evDate').textContent = (ev && ev.date) || '';
+    $('evDate').hidden = !(ev && ev.date);
+
+    const cs = (ev && ev.committees) || [];
+    $('evMun').hidden = !cs.length;
+    const opts = (first) => `<option value="">${first}</option>` + cs.map(c => `<option>${esc(c)}</option>`).join('');
+    const keep = (sel, first) => { const v = sel.value; sel.innerHTML = opts(first); if (cs.includes(v)) sel.value = v; };
+    keep(form.elements.committee_1, 'Choose a committee');
+    keep(form.elements.committee_2, '— none —');
   }
 
   /* ── open / close ── */
@@ -153,14 +169,25 @@ const Events = (() => {
     else if (!TYPES[file.type])    fileMsg = 'That needs to be a JPG, PNG or WebP image.';
     else if (file.size > MAX)      fileMsg = 'That image is over 5 MB — please send a smaller one.';
 
-    return [
+    /* a MUN asks for a WhatsApp number and at least a 1st committee choice */
+    const mun = Boolean((current() || {}).committees);
+    const munOk = !mun || [
+      setErr('phone',       val('phone').replace(/\D/g, '').length < 10 ? 'A WhatsApp number, e.g. 0300-1234567.' : ''),
+      setErr('committee_1', val('committee_1') ? '' : 'Pick your first choice.'),
+      setErr('committee_2', val('committee_2') && val('committee_2') === val('committee_1') ? 'Pick a different committee, or leave it.' : '')
+    ].every(Boolean);
+
+    /* both lists are checked in full before deciding, so every bad field is marked at once */
+    const baseOk = [
       setErr('event',     form.elements.event.value ? '' : 'Pick an event.'),
       setErr('full_name', val('full_name').length < 2 ? 'Please tell us your name.' : ''),
       setErr('roll_no',   val('roll_no').length   < 3 ? 'Your roll number, e.g. 25M-0524.' : ''),
       setErr('section',   val('section').length   < 1 ? 'Your section, e.g. BCS-3A.' : ''),
       setErr('email',     /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('email')) ? '' : 'That email does not look right.'),
       setErr('proof',     fileMsg)
-    ].every(Boolean) ? file : null;
+    ].every(Boolean);
+
+    return munOk && baseOk ? file : null;
   }
 
   const objectName = (type) => {
@@ -195,14 +222,22 @@ const Events = (() => {
       const path = objectName(file.type);
       await SB.upload('payment-proofs', path, file);
 
-      await SB.insert('event_registrations', {
+      const row = {
         event:      form.elements.event.value,
         full_name:  val('full_name'),
         roll_no:    val('roll_no'),
         section:    val('section'),
         email:      val('email').toLowerCase(),
         proof_path: path
-      });
+      };
+      /* only a MUN sends these — other events keep working on a database
+         that has never had the columns added */
+      if ((current() || {}).committees) {
+        row.phone       = val('phone');
+        row.committee_1 = val('committee_1');
+        row.committee_2 = val('committee_2') || null;
+      }
+      await SB.insert('event_registrations', row);
       store('localStorage', DONE, '1');
       finish();
     } catch (err) {
@@ -258,7 +293,7 @@ const Events = (() => {
     $('evAgain').addEventListener('click', () => {
       form.reset();
       if (LIST.length === 1) picker.querySelector('input').checked = true;   // reset() unticks it
-      paintIncludes();
+      paintEvent();
       form.querySelectorAll('.is-bad').forEach(el => el.classList.remove('is-bad'));
       form.querySelectorAll('.fld__err').forEach(el => { el.textContent = ''; });
       status.textContent = '';
@@ -273,7 +308,7 @@ const Events = (() => {
     form.addEventListener('input', (e) => { if (e.target.name) setErr(e.target.name, ''); });
     form.addEventListener('change', (e) => {
       if (e.target.name) setErr(e.target.name, '');
-      if (e.target.name === 'event') paintIncludes();
+      if (e.target.name === 'event') paintEvent();
     });
 
     document.addEventListener('keydown', (e) => {

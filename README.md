@@ -92,7 +92,7 @@ Everything renders from **`js/data.js`**. Nothing else needs touching for conten
 | Want to change | Edit |
 |---|---|
 | Registration form | it posts to Supabase — see **Registrations** below |
-| **Event popup** (workshop / dramatics) — events, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below. `pay.account` is filled in (2026-10-04) |
+| **Event popup** (now Bayaan MUN, 27 Nov 2026) — events, date, committees, fee, account number, on/off | `BAYAAN.events` — see **Event registration** below |
 | **MUN delegation form** (`mun.html`, link-only) — conference, fee, account, committees, on/off | `BAYAAN.mun` — see **MUN delegations** below |
 | Ticker couplets | `BAYAAN.ticker` |
 | Wings (name / Urdu / blurb / tags / icon) | `BAYAAN.wings` — each wing's `family` (`"speaking"` or `"literary"`) decides which half it lists under. A wing with no `family` still renders; it falls into the last group rather than vanishing |
@@ -218,23 +218,34 @@ CSV cells that begin with `=`, `+`, `-` or `@` are prefixed with an apostrophe o
 because Excel and Sheets execute those as formulas — a real attack route through any
 public form.
 
-## Event registration (workshop + dramatics)
+## Event registration (now: Bayaan MUN, 27 Nov 2026)
+
+**Current state (2026-11-21):** the popup is open for **Bayaan MUN** — Bayaan's own Model
+United Nations, **Friday 27 November 2026**, **PKR 150** to NayaPay (M. Umais), committees
+**UNSC (Security Council)** and **PNA**. The **Workshop** is over: hidden from the site, its
+registrations kept on the admin board. **Dramatics was cancelled**; Bayaan MUN took its place
+as the second event. (Bayaan MUN is separate from the BZU MUN delegation form, `mun.html`.)
 
 A popup that opens on its own when the site loads — after the intro curtain clears,
 once per visit — and stays reachable from a gold **Register** pill at the foot of the
 screen. The visitor picks an event, reads where to send the money, and submits **name,
-roll number, class section (e.g. BCS-3A), email and a screenshot of the payment**. One event per submission; someone
-doing both submits twice (the popup offers "Register another").
+roll number, class section (e.g. BCS-3A), email and a screenshot of the payment** — and,
+for a MUN-style event (one with `committees`), also a **WhatsApp number** and a **1st
+(required) and 2nd committee choice**. One event per submission; someone doing two submits
+twice (the popup offers "Register another").
 
-It is **not shown to anyone who has already registered** from that browser, and nobody
-sees it twice in the same visit. Both are remembered in browser storage.
+It is **not shown to anyone who has already registered for the events now open** from that
+browser, and nobody sees it twice in the same visit. Both are remembered in browser storage;
+the "registered" flag is keyed by the open events (`bayaan.ev.done.<keys>`), so having
+registered for the workshop does not hide the Bayaan MUN popup.
 
 **Ways in (all driven by `BAYAAN.events` — `open: false` removes every one of them):**
 - the popup itself on first load;
 - a gold **Register** button in the top bar, on every page;
-- a "workshop registration open · fee" chip at the top of the home hero;
-- a **ticket card** under the home-page ticker (event name, what it covers, `perk`, fee, button);
-- a **Workshop** item in the side drawer;
+- a "Bayaan MUN registration open · fee" chip at the top of the home hero;
+- a **ticket card** under the home-page ticker (event name, what it covers — or, for a MUN,
+  its committees — then `date` and `perk`, fee, button);
+- a **Bayaan MUN** item in the side drawer;
 - the floating pill — only after scrolling past the hero, and not while the ticket is in view.
 
 Any element with `data-ev-open` opens the popup. A **shareable link**, `…/?register` (or
@@ -254,26 +265,40 @@ so the plain link will not pop up for you again.
    `grant insert (section) on public.event_registrations to anon, authenticated;` (the table
    grant is column-level, so the grant is what lets the form write it). Older rows have no
    section and show "—" in the admin Events tab.
+   ⚠️ **Same rule for the MUN columns** (`phone`, `committee_1/2/3`, added 2026-11-21 for
+   Bayaan MUN): they must exist on the live DB *before* the site that sends them is deployed,
+   or every Bayaan MUN submission fails. Re-run `events.sql`. Events without `committees` never
+   send these columns, so they are unaffected either way.
 3. Fill in `BAYAAN.events.pay` in `js/data.js` — `account` (and, if you like, `method`,
    `title`, `fee`). Anything left blank is simply not shown; with `account` blank the popup
    says payment details will appear shortly.
 4. Set `BAYAAN.events.open` to `true` to switch the popup and pill on, `false` to switch
-   them off. **It is currently `true`, for the Workshop only.**
+   them off. **It is currently `true`, for Bayaan MUN only.**
 
 **Which events show.** `BAYAAN.events.list` holds every event; an entry with
-`hidden: true` stays defined (the admin board still resolves its name on old rows) but is
-kept out of the popup and the pill. **Dramatics is currently hidden** — delete its
-`hidden: true` to open it; with two visible events the popup shows a picker, with one it
-skips the picker and pre-selects it. `includes: [...]` lists what one registration covers
-and is shown in a highlighted box in the popup.
+`hidden: true` stays defined (the admin board and the Broadcast tab still resolve its name on
+old rows) but is kept out of the popup and the pill. **Workshop and Dramatics are hidden.**
+With two visible events the popup shows a picker; with one it skips the picker and
+pre-selects it. Per event:
+* `includes: [...]` — what one registration covers, in a highlighted box in the popup;
+* `date` — shown under the popup title and on the ticket;
+* `committees: [...]` — makes it a MUN-style event: the popup adds WhatsApp + 1st/2nd
+  committee dropdowns, and the ticket lists the committees;
+* `perk` — one line of small print on the ticket.
 
-**The Workshop** is one event (`key: "workshop"`, one fee, one registration) that covers
-two sessions: *Asian Style of Debating* and *Public Speaking*. Both are listed in the
-popup and in the confirmation email.
+**Bayaan MUN** (`key: "bayaan-mun"`): Friday 27 November 2026, committees
+`["UNSC (Security Council)", "PNA"]`. The admin **Events** tab shows each row's WhatsApp
+(opens a chat) and committee choices when expanded, tallies **1st choices** in the count line
+(e.g. `PNA 12 · UNSC (Security Council) 7`), and exports `phone`, `committee_1`,
+`committee_2` in the CSV.
 
-**Payment details** (set 2026-10-04): fee PKR 200, account title *M. Umais*, number
-*+92 307 6537688*, method *NayaPay* (shown as the "Send to" row). If `pay.account` is ever blanked the
-popup says payment details will appear shortly.
+**The Workshop** (done; `key: "workshop"`, hidden since 2026-11-21) was one event, one fee,
+that covered *Asian Style of Debating* and *Public Speaking*. Its rows stay on the board, and
+the Broadcast tab can still send its certificates.
+
+**Payment details:** fee **PKR 150** (Bayaan MUN; the workshop was PKR 200), account title
+*M. Umais*, number *+92 307 6537688*, method *NayaPay* (shown as the "Send to" row). If
+`pay.account` is ever blanked the popup says payment details will appear shortly.
 
 **Still not built:** a "thank you — verification in progress" email sent the moment someone
 submits. (Held back on purpose: the public form can name any address, so an automatic

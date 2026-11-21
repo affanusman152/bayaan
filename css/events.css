@@ -90,6 +90,21 @@
 }
 .evm__sub { margin-top: .6rem; font-size: var(--t-sm); color: var(--cream-dim); line-height: 1.55; }
 
+/* the event's date, under the title */
+.evm__date {
+  margin-top: .45rem;
+  font-family: var(--f-display);
+  font-size: .95rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-lite);
+}
+
+/* MUN events: WhatsApp + committee choices */
+.evm__mun { display: grid; gap: .5rem; }
+.evm__prefs { display: grid; gap: .5rem; }
+@media (min-width: 520px) { .evm__prefs { grid-template-columns: 1fr 1fr; gap: 1rem; } }
+
 /* what one registration covers */
 .evm__incl {
   margin-top: 1rem;

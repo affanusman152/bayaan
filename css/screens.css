@@ -1111,6 +1111,9 @@ body.has-hero .hero__fallback { display: none; }
 }
 .fld__in--area { resize: vertical; min-height: 5.4rem; line-height: 1.55; }
 .fld__in.is-bad { border-color: var(--maroon-hot); }
+/* dropdowns (committee choices): keep the opened list dark, not the OS's white */
+select.fld__in { cursor: pointer; }
+select.fld__in option { background: var(--ink-2); color: var(--cream); }
 
 .fld__err {
   font-style: normal;

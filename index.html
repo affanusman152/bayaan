@@ -435,6 +435,7 @@
 
     <p class="evm__live"><i></i> Registrations open now</p>
     <h2 class="evm__title" id="evTitle">Event registration</h2>
+    <p class="evm__date" id="evDate" hidden></p>
     <p class="evm__sub" id="evSub"></p>
     <div class="evm__incl" id="evIncl" hidden></div>
 
@@ -470,6 +471,27 @@
         <input class="fld__in" name="email" type="email" required maxlength="120" autocomplete="email" />
         <em class="fld__err" id="ev_err_email"></em>
       </label>
+
+      <!-- MUN-style events only (an event with `committees` in BAYAAN.events.list) -->
+      <div class="evm__mun" id="evMun" hidden>
+        <label class="fld">
+          <span class="fld__label">WhatsApp number <i>*</i></span>
+          <input class="fld__in" name="phone" type="tel" maxlength="24" placeholder="03xx-xxxxxxx" autocomplete="tel" />
+          <em class="fld__err" id="ev_err_phone"></em>
+        </label>
+        <div class="evm__prefs">
+          <label class="fld">
+            <span class="fld__label">Committee · 1st choice <i>*</i></span>
+            <select class="fld__in" name="committee_1"></select>
+            <em class="fld__err" id="ev_err_committee_1"></em>
+          </label>
+          <label class="fld">
+            <span class="fld__label">2nd choice</span>
+            <select class="fld__in" name="committee_2"></select>
+            <em class="fld__err" id="ev_err_committee_2"></em>
+          </label>
+        </div>
+      </div>
 
       <label class="fld">
         <span class="fld__label">Payment screenshot <i>*</i></span>

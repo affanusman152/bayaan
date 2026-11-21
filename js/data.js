@@ -33,22 +33,31 @@ const BAYAAN = {
      first so nobody is invited to pay without knowing where. */
   events: {
     open: true,
-    title: "Workshop registration",
-    blurb: "Pay the fee, upload the screenshot, and we'll verify it and confirm by email.",
+    title: "Bayaan MUN registration",
+    blurb: "Bayaan's own Model United Nations, Friday 27 November 2026. Pick your committee, pay the fee, upload the screenshot — we'll verify it and confirm by email.",
     pay: {
       method:  "NayaPay",          // e.g. "Easypaisa" / "JazzCash" / "Bank transfer"
       title:   "M. Umais",         // account title
       account: "+92 307 6537688",  // account / IBAN / wallet number
-      fee:     "PKR 200"
+      fee:     "PKR 150"           // Bayaan MUN (the workshop was PKR 200)
     },
     /* `includes` — what one registration covers; shown in the popup and on the
        home-page ticket. `perk` — one line of small print on that ticket.
+       `date` — shown on the ticket and in the popup.
+       `committees` — a MUN-style event: the popup also asks for a WhatsApp number
+       and a 1st (required) / 2nd committee choice from this list, and the ticket
+       lists the committees. Needs the phone/committee columns (supabase/events.sql).
        `hidden: true` — keeps an event defined (the admin board still shows its
        name on old rows) but out of the popup and the pill. Drop the flag to open it. */
     list: [
-      { key: "workshop",  name: "Workshop",  ur: "ورکشاپ",
+      { key: "bayaan-mun", name: "Bayaan MUN",
+        date: "Friday 27 November 2026",
+        committees: ["UNSC (Security Council)", "PNA"] },
+      /* done — registration closed 2026-11-21; its rows stay on the admin board */
+      { key: "workshop",  name: "Workshop",  ur: "ورکشاپ", hidden: true,
         includes: ["Asian Style of Debating", "Public Speaking"],
         perk: "Certificate for every participant" },
+      /* cancelled 2026-11-21 — Bayaan MUN took its place as the second event */
       { key: "dramatics", name: "Dramatics", ur: "ڈرامہ", hidden: true }
     ]
   },

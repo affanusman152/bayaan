@@ -51,6 +51,12 @@ const REPLY_TO   = '';                       // optional, e.g. the society's Ins
    or `notes` as '' and that line is simply left out of the email. `includes` is an
    optional list of sessions one registration covers; omit it for a single session. */
 const EVENTS = {
+  'bayaan-mun': {
+    name:  'Bayaan MUN',
+    when:  'Friday 27 November 2026',        // add the time once it is fixed, e.g. 'Friday 27 November 2026, 10:00 AM'
+    where: '',                               // e.g. 'Seminar Hall, FAST NUCES Multan'
+    notes: ''                                // e.g. 'Committee allocations will be shared on WhatsApp.'
+  },
   workshop: {
     name:  'Workshop',
     includes: ['Asian Style of Debating', 'Public Speaking'],   // one registration covers both
@@ -58,7 +64,7 @@ const EVENTS = {
     where: '',                               // e.g. 'Seminar Hall, FAST NUCES Multan'
     notes: ''                                // e.g. 'Please bring your student card.'
   },
-  dramatics: {
+  dramatics: {                               // cancelled 2026-11-21; kept so any old row still has a name
     name:  'Dramatics',
     when:  '',
     where: '',
