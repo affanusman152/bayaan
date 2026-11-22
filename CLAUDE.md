@@ -19,7 +19,7 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   + private `payment-proofs` bucket. `BAYAAN.events.list[].hidden` keeps an event out of the popup; `includes` lists what one registration covers; `perk` is the ticket's small print;
   `date` shows under the popup title + on the ticket; `committees` makes it MUN-style (adds WhatsApp + 1st/2nd committee dropdowns; ticket lists the committees).
   Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot;
-  MUN-style events also `phone`, `committee_1`, `committee_2` (columns added 2026-11-21 — same rule: on the live DB before deploying).
+  MUN-style events also `phone`, `committee_1`, `committee_2` (columns added 2026-11-21, applied live 2026-11-22 as migration `event_registrations_mun_fields` — same rule: on the live DB before deploying).
   "Already registered" is stored per set of open events (`bayaan.ev.done.<keys>`), so an old workshop registration doesn't hide a new event's popup.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
