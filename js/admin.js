@@ -13,6 +13,7 @@
   const rows = $('adRows'), note = $('adNote'), count = $('adCount'), head = $('adHead');
 
   let all = [];
+  let caps = {};                       // committee seat caps per event key (supabase/events.sql)
   let view = 'registrations';
   let castPoll = null;
 
@@ -227,6 +228,14 @@
       const data = await SB.select(V().table, V().query || 'select=*&order=created_at.desc');
       if (asked !== view) return;                 // they switched tabs mid-flight
       all = data;
+      /* the Events tab shows seats taken against each committee's cap; a DB
+         without the caps table just shows the plain tally */
+      if (view === 'events') {
+        try {
+          caps = Object.fromEntries((await SB.select('event_committee_caps', 'select=event,per_committee'))
+            .map(c => [c.event, c.per_committee]));
+        } catch { caps = {}; }
+      }
       note.textContent = '';
       paint();
       if (!all.length) note.textContent = V().empty;
@@ -276,8 +285,14 @@
         ? (BAYAAN.mun && BAYAAN.mun.committees) || []
         : ((BAYAAN.events && BAYAAN.events.list) || []).flatMap(e => e.committees || []);
       const order = known.concat(Object.keys(tally));
-      const parts = [...new Set(order)].filter(c => tally[c]).map(c => c + ' ' + tally[c]);
-      if (parts.length) count.textContent += ' · 1st choices: ' + parts.join(' · ');
+      /* Bayaan MUN: a capped committee reads "PNA 12/30" (seats held = not rejected) */
+      const capOf = (c) => view === 'events'
+        ? (((BAYAAN.events && BAYAAN.events.list) || []).filter(e => (e.committees || []).includes(c))
+            .map(e => caps[e.key]).find(Boolean))
+        : null;
+      const parts = [...new Set(order)].filter(c => tally[c])
+        .map(c => c + ' ' + tally[c] + (capOf(c) ? '/' + capOf(c) + (tally[c] >= capOf(c) ? ' (full)' : '') : ''));
+      if (parts.length) count.textContent += (view === 'events' && Object.keys(caps).length ? ' · seats: ' : ' · 1st choices: ') + parts.join(' · ');
     }
 
     rows.innerHTML = list.map(r => {

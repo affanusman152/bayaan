@@ -289,8 +289,26 @@ pre-selects it. Per event:
 **Bayaan MUN** (`key: "bayaan-mun"`): Friday 27 November 2026, committees
 `["UNSC (Security Council)", "PNA"]`. The admin **Events** tab shows each row's WhatsApp
 (opens a chat) and committee choices when expanded, tallies **1st choices** in the count line
-(e.g. `PNA 12 · UNSC (Security Council) 7`), and exports `phone`, `committee_1`,
+(e.g. `seats: UNSC (Security Council) 12/30 · PNA 1/30`), and exports `phone`, `committee_1`,
 `committee_2` in the CSV.
+
+**Seat caps — 30 per committee (added 2026-11-23).** The venue can't hold more than 30 in a
+committee, so each Bayaan MUN committee stops at **30 registrations**. A registration takes its
+seat in its **1st choice**; *pending* and *verified* rows hold a seat, **rejecting a row frees
+it**. The cap lives in the database (`supabase/events.sql`, table `event_committee_caps`), not
+in `data.js`:
+* a trigger refuses the registration that would go over (with a lock, so two people racing for
+  the last seat cannot both get it) — the form shows "This committee just filled up — pick
+  another", plus "if you have already paid, message us on Instagram";
+* the public function `event_committee_seats(event)` returns only counts (`{"seats":30,"taken":{…}}`),
+  never names. The popup reads it to mark a committee **"— full"** (can't be picked) or
+  **"— N seats left"** (10 or fewer), re-checks it just before upload, and when **every**
+  committee is full it hides the form and shows a "registration is closed" note instead;
+* moving a rejected row back to pending/verified is refused too if that committee is full.
+Change the cap with `update public.event_committee_caps set per_committee = 40 where event = 'bayaan-mun';`
+— delete the row to uncap. Other events have no row, so they are not capped.
+⚠️ The popup works without the DB part (it just shows no seat labels), but **the cap is only
+enforced once events.sql has been applied to the live project.**
 
 **The Workshop** (done; `key: "workshop"`, hidden since 2026-11-21) was one event, one fee,
 that covered *Asian Style of Debating* and *Public Speaking*. Its rows stay on the board, and

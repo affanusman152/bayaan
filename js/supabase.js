@@ -54,7 +54,9 @@ const SB = (() => {
 
   /* call a database function as the public (anon). Used by mun.html, whose
      delegation + members must land together: submit_mun_delegation() writes them
-     in one transaction, so a bad member never leaves half a delegation behind. */
+     in one transaction, so a bad member never leaves half a delegation behind —
+     and by the event popup, which reads seats left via event_committee_seats().
+     Returns the function's result (null for a void function). */
   async function rpc(fn, args) {
     const res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
       method: 'POST',
@@ -62,6 +64,8 @@ const SB = (() => {
       body: JSON.stringify(args)
     });
     if (!res.ok) throw await fail(res);
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
   }
 
   async function select(table, query = '') {

@@ -145,6 +145,13 @@
 }
 .evm__pay dd { color: var(--gold-lite); text-align: right; word-break: break-all; user-select: all; }
 .evm__soon { font-size: var(--t-sm); color: var(--cream-dim); text-align: center; }
+/* every committee full (seat caps, supabase/events.sql): only the note (and the
+   event picker, if another event is still open) stays */
+.evm__form.is-full > :not(#evFull):not(#evPickWrap) { display: none; }
+.evm__full {
+  padding: .9rem 1rem; border: 1px solid var(--gold-deep); border-radius: 12px;
+  background: rgba(124,15,20,.3); font-size: var(--t-sm); line-height: 1.55; color: var(--cream);
+}
 
 .fld__in--file { padding: .6rem .7rem; font-size: var(--t-sm); cursor: pointer; }
 .fld__in--file::file-selector-button {

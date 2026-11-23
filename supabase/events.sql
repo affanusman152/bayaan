@@ -1,5 +1,6 @@
 -- ═══════════════════════════════════════════════════════════════════════
 --  BAYAAN — event registrations (workshop, Bayaan MUN, …)
+--  Includes seat caps per committee (event_committee_caps; Bayaan MUN = 30).
 --  Run AFTER schema.sql (it reuses public.is_admin()).
 --  Run once, whole, in the Supabase SQL editor. Safe to re-run.
 -- ═══════════════════════════════════════════════════════════════════════
@@ -145,3 +146,103 @@ drop policy if exists "admins may read payment proofs" on storage.objects;
 create policy "admins may read payment proofs"
   on storage.objects for select to authenticated
   using (bucket_id = 'payment-proofs' and public.is_admin());
+
+-- ─────────────────────────────────────────────────────────────────────
+--  SEAT CAPS PER COMMITTEE (added 2026-11-23 for Bayaan MUN: 30 a committee)
+--  A row here caps how many registrations one committee of that event can
+--  hold. A registration takes a seat in its `committee_1`; `pending` and
+--  `verified` rows hold one, `rejected` rows free it. Events with no row here
+--  are not capped. The trigger is the authority — the popup only mirrors it.
+--  Change a cap:  update public.event_committee_caps set per_committee = 40
+--                 where event = 'bayaan-mun';
+-- ─────────────────────────────────────────────────────────────────────
+create table if not exists public.event_committee_caps (
+  event         text primary key,
+  per_committee int  not null check (per_committee between 1 and 1000)
+);
+alter table public.event_committee_caps enable row level security;
+revoke all on public.event_committee_caps from anon, authenticated;
+grant select on public.event_committee_caps to authenticated;
+drop policy if exists "admins may read committee caps" on public.event_committee_caps;
+create policy "admins may read committee caps"
+  on public.event_committee_caps for select to authenticated
+  using (public.is_admin());
+
+insert into public.event_committee_caps (event, per_committee) values ('bayaan-mun', 30)
+on conflict (event) do update set per_committee = excluded.per_committee;
+
+-- Refuses the registration that would go over the cap. SECURITY DEFINER because
+-- the public cannot read the table it has to count. The advisory lock makes two
+-- people racing for the last seat queue up, so the cap cannot be overshot.
+-- Also guards an admin moving a rejected row back to pending/verified.
+create or replace function public.event_registrations_seat_check()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cap   int;
+  v_taken int;
+begin
+  if new.committee_1 is null or new.status = 'rejected' then
+    return new;
+  end if;
+  if tg_op = 'UPDATE' and old.status <> 'rejected'
+     and old.committee_1 is not distinct from new.committee_1 then
+    return new;                         -- already holds this seat
+  end if;
+
+  select per_committee into v_cap from event_committee_caps where event = new.event;
+  if v_cap is null then
+    return new;                         -- this event is not capped
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('seat:' || new.event || ':' || new.committee_1));
+
+  select count(*) into v_taken
+    from event_registrations
+   where event = new.event
+     and committee_1 = new.committee_1
+     and status <> 'rejected'
+     and (tg_op = 'INSERT' or id <> new.id);
+
+  if v_taken >= v_cap then
+    -- js/events.js looks for the word committee_full in this message
+    raise exception 'committee_full: % is full (% seats)', new.committee_1, v_cap
+      using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists event_registrations_seat_check on public.event_registrations;
+create trigger event_registrations_seat_check
+  before insert or update of status, committee_1 on public.event_registrations
+  for each row execute function public.event_registrations_seat_check();
+
+-- What the popup reads to grey out full committees: the cap and the seats taken
+-- per committee, as {"seats":30,"taken":{"PNA":4,...}} — null for an uncapped
+-- event. Counts only, never names, so it is safe for anyone to call.
+create or replace function public.event_committee_seats(p_event text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case when c.event is null then null else jsonb_build_object(
+           'seats', c.per_committee,
+           'taken', coalesce((
+              select jsonb_object_agg(t.committee_1, t.n)
+                from (select committee_1, count(*) as n
+                        from event_registrations
+                       where event = p_event and status <> 'rejected' and committee_1 is not null
+                       group by committee_1) t), '{}'::jsonb))
+         end
+    from (select p_event as e) x
+    left join event_committee_caps c on c.event = x.e;
+$$;
+
+revoke all on function public.event_committee_seats(text) from public;
+grant execute on function public.event_committee_seats(text) to anon, authenticated;

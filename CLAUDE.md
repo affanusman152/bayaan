@@ -20,6 +20,9 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   `date` shows under the popup title + on the ticket; `committees` makes it MUN-style (adds WhatsApp + 1st/2nd committee dropdowns; ticket lists the committees).
   Form fields: name, roll no, **section** (column added 2026-10-04 — must exist on the live DB before the site that sends it), email, screenshot;
   MUN-style events also `phone`, `committee_1`, `committee_2` (columns added 2026-11-21, applied live 2026-11-22 as migration `event_registrations_mun_fields` — same rule: on the live DB before deploying).
+  **Seat caps** (2026-11-23): table `event_committee_caps` (Bayaan MUN = 30 per committee) + trigger `event_registrations_seat_check`
+  (counts `committee_1`, not-rejected rows, advisory lock) + public RPC `event_committee_seats(p_event)` (counts only) that the popup
+  uses to mark committees full / "N seats left" and to close the form when all are full. Admin Events tab shows "12/30".
   "Already registered" is stored per set of open events (`bayaan.ev.done.<keys>`), so an old workshop registration doesn't hide a new event's popup.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.

@@ -34,6 +34,27 @@ const Events = (() => {
 
   let isOpen = false, lastFocus = null;
 
+  /* seat caps per committee — {seats: 30, taken: {"PNA": 4, …}} per event key,
+     read from event_committee_seats(). The database trigger is what actually
+     enforces the cap; this only greys out full committees before anyone pays.
+     If the call fails the dropdowns simply show every committee. */
+  const SEATS = {};
+  const LOW = 10;                        // show "N seats left" from here down
+
+  async function loadSeats() {
+    const capped = LIST.filter(e => e.committees);
+    await Promise.all(capped.map(async (e) => {
+      try { SEATS[e.key] = await SB.rpc('event_committee_seats', { p_event: e.key }); }
+      catch { /* not applied yet, or offline — leave it uncapped on screen */ }
+    }));
+  }
+
+  /* seats left in one committee of one event, or Infinity when uncapped */
+  const left = (key, c) => {
+    const s = SEATS[key];
+    return s && s.seats ? Math.max(0, s.seats - ((s.taken || {})[c] || 0)) : Infinity;
+  };
+
   const esc = (s = '') => String(s).replace(/[&<>"]/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
   ));
@@ -120,15 +141,33 @@ const Events = (() => {
 
     const cs = (ev && ev.committees) || [];
     $('evMun').hidden = !cs.length;
-    const opts = (first) => `<option value="">${first}</option>` + cs.map(c => `<option>${esc(c)}</option>`).join('');
-    const keep = (sel, first) => { const v = sel.value; sel.innerHTML = opts(first); if (cs.includes(v)) sel.value = v; };
+    /* a full committee stays listed but cannot be picked; a nearly full one says so */
+    const label = (c) => {
+      const n = left(ev.key, c);
+      return n === 0 ? c + ' — full' : n <= LOW ? c + ' — ' + n + (n === 1 ? ' seat left' : ' seats left') : c;
+    };
+    const opts = (first) => `<option value="">${first}</option>` + cs.map(c =>
+      `<option value="${esc(c)}"${left(ev.key, c) === 0 ? ' disabled' : ''}>${esc(label(c))}</option>`).join('');
+    const keep = (sel, first) => {
+      const v = sel.value;
+      sel.innerHTML = opts(first);
+      if (cs.includes(v) && left(ev.key, v) > 0) sel.value = v;
+    };
     keep(form.elements.committee_1, 'Choose a committee');
     keep(form.elements.committee_2, '— none —');
+
+    /* every committee full: no point taking anyone's money — close the form */
+    const full = cs.length > 0 && cs.every(c => left(ev.key, c) === 0);
+    $('evFull').hidden = !full;
+    form.classList.toggle('is-full', full);       // css/events.css hides the rest of the form
+    send.disabled = full;
   }
 
   /* ── open / close ── */
   function open() {
     if (isOpen) return;
+    /* seats move while the page sits open — refresh them each time */
+    loadSeats().then(paintEvent);
     isOpen = true;
     lastFocus = document.activeElement;
     store('sessionStorage', SEEN, '1');
@@ -190,6 +229,8 @@ const Events = (() => {
     return munOk && baseOk ? file : null;
   }
 
+  const FULL_NOTE = 'That committee is full. If you have already paid, message us on Instagram and we will sort it out.';
+
   const objectName = (type) => {
     const id = (crypto.randomUUID && crypto.randomUUID()) ||
                (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
@@ -215,6 +256,22 @@ const Events = (() => {
 
     send.disabled = true;
     send.querySelector('span').textContent = 'Sending…';
+
+    /* last look at the seats before the upload, so a committee that filled up
+       while this form was open is caught before anything is sent */
+    const ev = current();
+    if (ev && ev.committees) {
+      await loadSeats();
+      if (left(ev.key, val('committee_1')) === 0) {
+        paintEvent();
+        send.disabled = $('evFull').hidden === false;
+        send.querySelector('span').textContent = 'Send registration';
+        setErr('committee_1', 'This committee just filled up — pick another.');
+        status.className = 'reg__status is-bad';
+        status.textContent = FULL_NOTE;
+        return;
+      }
+    }
 
     try {
       /* image first: the row has to point at a file that exists. A failed row
@@ -244,6 +301,15 @@ const Events = (() => {
       send.disabled = false;
       send.querySelector('span').textContent = 'Send registration';
       status.className = 'reg__status is-bad';
+      if (/committee_full/.test(err.message || '')) {
+        /* lost the race for the last seat — the trigger said no */
+        await loadSeats();
+        paintEvent();
+        setErr('committee_1', 'This committee just filled up — pick another.');
+        status.className = 'reg__status is-bad';
+        status.textContent = FULL_NOTE;
+        return;
+      }
       status.textContent = err.status === 409
         ? 'That roll number is already registered for this event.'
         : `Could not send that: ${err.message}. Please try again, or reach us on Instagram.`;
@@ -259,6 +325,7 @@ const Events = (() => {
   /* ── wire ── */
   function init() {
     paint();
+    loadSeats().then(paintEvent);
     pill.hidden = false;
 
     modal.addEventListener('click', (e) => { if (e.target.closest('[data-ev-close]')) close(); });
