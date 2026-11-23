@@ -60,13 +60,15 @@
   <div class="ad__tabs" role="tablist">
     <button class="ad__tab is-on" id="adTabReg" type="button" role="tab" data-view="registrations">Induction</button>
     <button class="ad__tab" id="adTabEv" type="button" role="tab" data-view="events">Events</button>
-    <button class="ad__tab" id="adTabMun" type="button" role="tab" data-view="mun">MUN</button>
+    <button class="ad__tab" id="adTabBmun" type="button" role="tab" data-view="bayaanmun">Bayaan MUN</button>
+    <button class="ad__tab" id="adTabMun" type="button" role="tab" data-view="mun">BZU MUN</button>
     <button class="ad__tab" id="adTabCast" type="button" role="tab" data-view="broadcast">Broadcast</button>
   </div>
 
   <div class="ad__tools" id="adTools">
     <input class="ad__search" id="adSearch" type="search" placeholder="Search…" />
     <select class="ad__filter" id="adStatus"></select>
+    <select class="ad__filter" id="adCommittee" hidden aria-label="Committee"></select>
     <span class="ad__count" id="adCount"></span>
     <button class="ad__btn ad__btn--ghost" id="adRefresh" type="button">Refresh</button>
     <button class="ad__btn ad__btn--ghost" id="adCsv" type="button">Export CSV</button>

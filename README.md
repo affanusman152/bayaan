@@ -122,7 +122,7 @@ its internal geometry.
 
 ```
 index.html          all six screens, in order
-admin.html          the registrations board — Induction, Events, MUN and Broadcast tabs (noindex, not linked from the site)
+admin.html          the registrations board — Induction, Events, Bayaan MUN, BZU MUN and Broadcast tabs (noindex, not linked from the site)
 mun.html            the MUN registration form (individual or delegation-head) — reached ONLY by its link (noindex, not linked from the site)
 serve.js            `node serve.js` — tiny static server, no deps
 supabase/schema.sql the induction tables and row-level-security rules — run this once
@@ -147,7 +147,7 @@ js/supabase.js      ~120 lines of fetch (REST, one RPC call, storage) — no SDK
 js/join.js          the induction registration form
 js/events.js        the event popup: auto-open, validation, screenshot upload, submit
 js/mun.js           the delegation form: add/remove delegates, live total, saved draft, upload, submit
-js/admin.js         sign-in, the Induction / Events / MUN tables, triage, screenshot viewer, CSV export, the Broadcast tab
+js/admin.js         sign-in, the Induction / Events / Bayaan MUN / BZU MUN tables, triage, screenshot viewer, CSV export, the Broadcast tab
 js/drawer.js        drawer + focus trap + swipe gestures
 js/router.js        hash routing + the curtain transition
 js/intro.js         the intro — reuses the router's curtain
@@ -287,10 +287,16 @@ pre-selects it. Per event:
 * `perk` — one line of small print on the ticket.
 
 **Bayaan MUN** (`key: "bayaan-mun"`): Friday 27 November 2026, committees
-`["UNSC (Security Council)", "PNA"]`. The admin **Events** tab shows each row's WhatsApp
-(opens a chat) and committee choices when expanded, tallies **1st choices** in the count line
-(e.g. `seats: UNSC (Security Council) 12/30 · PNA 1/30`), and exports `phone`, `committee_1`,
-`committee_2` in the CSV.
+`["UNSC (Security Council)", "PNA"]`. Its registrations have **their own admin tab, Bayaan MUN**
+(added 2026-11-23), so they never mix with the other events: any event with `committees` goes
+there, and the **Events** tab shows only the rest (the workshop). The Bayaan MUN tab lists name,
+roll, section, WhatsApp (opens a chat), committees (1st, with the 2nd underneath) and the
+screenshot; the count line shows seats taken (e.g. `seats: UNSC (Security Council) 12/30 · PNA 1/30`).
+A **committee filter** (All / UNSC (Security Council) / PNA — by 1st choice, the seat a row holds)
+works with search and the status filter, and **Export CSV exports exactly what is listed**, named
+after it: `bayaan-mun-2026-11-23.csv`, `bayaan-mun-pna-….csv`, `bayaan-mun-unsc-verified-….csv`.
+Columns: received, name, roll, section, email, phone, `committee_1`, `committee_2`, status,
+`verified_at`, `confirmation_sent_at`, notes.
 
 **Seat caps — 30 per committee (added 2026-11-23).** The venue can't hold more than 30 in a
 committee, so each Bayaan MUN committee stops at **30 registrations**. A registration takes its
@@ -335,8 +341,8 @@ limits hold even if someone bypasses `js/events.js`. One registration per roll n
 **per event** is a unique index. A failed submit after a good upload can leave one stray,
 unreadable image behind — harmless.
 
-### Verifying payments — the Events tab on `/admin.html`
-Open the **Events** tab, click **View screenshot**, compare it with the account statement,
+### Verifying payments — the Events and Bayaan MUN tabs on `/admin.html`
+Open the **Events** tab (or **Bayaan MUN** for MUN registrations), click **View screenshot**, compare it with the account statement,
 then set the row's status to `verified` (or `rejected`). Moving to `verified` stamps
 `verified_at` automatically. `confirmation_sent_at` is reserved for the email automation.
 
@@ -486,7 +492,7 @@ saved, never half a delegation. A student can be in **only one delegation per co
 the existing private `payment-proofs` bucket under `mun/`, and the function refuses a
 screenshot path that was never uploaded or is already used.
 
-**Verifying — the MUN tab on `/admin.html`.** One row per submission (in individual mode, one
+**Verifying — the BZU MUN tab on `/admin.html`** (labelled "MUN" before 2026-11-23). One row per submission (in individual mode, one
 per person): name, contact (the number opens WhatsApp), delegate count, total,
 *View screenshot*, status. Expand a row (`+`) to see the member(s) and their committee
 choices; search matches any member's name or roll number. Marking a row `verified` verifies

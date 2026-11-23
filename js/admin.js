@@ -1,7 +1,8 @@
 /* ══════════════ ADMIN — the registrations board ══════════════
-   Reads and triages submissions, for three boards: the induction `registrations`,
-   the paid `event_registrations`, and MUN delegations (`mun_delegations` with their
-   `mun_delegates`, from mun.html). Nothing here is a security boundary: the
+   Reads and triages submissions, for four boards: the induction `registrations`,
+   the paid `event_registrations` — split into Events and Bayaan MUN (the
+   committee events, with a per-committee filter) — and BZU MUN delegations
+   (`mun_delegations` with their `mun_delegates`, from mun.html). Nothing here is a security boundary: the
    database decides what this page may see. An account that signs in but is not
    listed in `admins` gets an empty list, because the RLS policy says so — not
    because this file hid anything. ────────────────────────────────────────── */
@@ -25,6 +26,12 @@
 
   const when = (iso) => new Date(iso).toLocaleString(undefined,
     { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  /* events with committees (Bayaan MUN) get their own tab; the Events tab shows the rest.
+     Keys go into a PostgREST in.(…) list, quoted so a hyphen or comma cannot break it. */
+  const COMMITTEE_EVENTS = ((BAYAAN.events && BAYAAN.events.list) || []).filter(e => e.committees);
+  const inList = '(' + COMMITTEE_EVENTS.map(e => '"' + e.key + '"').join(',') + ')';
+  const COMMITTEES = [...new Set(COMMITTEE_EVENTS.flatMap(e => e.committees))];
 
   const eventName = (key) => {
     const hit = ((BAYAAN.events && BAYAAN.events.list) || []).find(e => e.key === key);
@@ -62,6 +69,7 @@
 
     events: {
       table:    'event_registrations',
+      query:    'select=*' + (COMMITTEE_EVENTS.length ? '&event=not.in.' + inList : '') + '&order=created_at.desc',
       empty:    'No event registrations yet. If you expected some, check that you have run ' +
                 'supabase/events.sql and that your account is in the admins table.',
       statuses: ['pending', 'verified', 'rejected'],
@@ -87,6 +95,35 @@
               : '—') + '</p></div>' +
             '<div><h4>Committee (1st · 2nd)</h4><p>' + esc([r.committee_1, r.committee_2].filter(Boolean).join(' · ') || '—') + '</p></div>'
           : '') +
+        '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
+        '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
+    },
+
+    /* Bayaan MUN — the popup's committee events, kept apart from the other events.
+       The committee filter (1st choice = the seat it holds) narrows the list AND the CSV. */
+    bayaanmun: {
+      table:    'event_registrations',
+      query:    'select=*&event=in.' + inList + '&order=created_at.desc',
+      empty:    'No Bayaan MUN registrations yet.',
+      statuses: ['pending', 'verified', 'rejected'],
+      headers:  ['', 'Received', 'Name', 'Roll', 'Section', 'WhatsApp', 'Committee (1st · 2nd)', 'Payment', 'Status'],
+      csv:      ['created_at', 'full_name', 'roll_no', 'section', 'email', 'phone',
+                 'committee_1', 'committee_2', 'status', 'verified_at', 'confirmation_sent_at', 'notes'],
+      haystack: (r) => [r.full_name, r.roll_no, r.section, r.email, r.phone, r.committee_1, r.committee_2, r.status],
+      cells: (r) =>
+        '<td><button class="ad__more" type="button" aria-label="Show details">+</button></td>' +
+        '<td class="ad__dim">' + esc(when(r.created_at)) + '</td>' +
+        '<td><b>' + esc(r.full_name) + '</b></td>' +
+        '<td class="ad__mono">' + esc(r.roll_no) + '</td>' +
+        '<td class="ad__mono">' + esc(r.section || '—') + '</td>' +
+        '<td>' + (r.phone
+          ? '<a href="https://wa.me/' + esc(waNumber(r.phone)) + '" target="_blank" rel="noopener">' + esc(r.phone) + '</a>'
+          : '—') + '</td>' +
+        '<td><span class="ad__tag">' + esc(r.committee_1 || '—') + '</span>' +
+          (r.committee_2 ? '<br /><span class="ad__dim">' + esc(r.committee_2) + '</span>' : '') + '</td>' +
+        '<td><button class="ad__btn ad__btn--ghost ad__proof" type="button" data-path="' + esc(r.proof_path) + '">View screenshot</button></td>',
+      detail: (r) =>
+        '<div><h4>Email</h4><p><a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a></p></div>' +
         '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
         '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
     },
@@ -207,6 +244,11 @@
     }
 
     head.innerHTML = '<tr>' + V().headers.map(h => '<th>' + h + '</th>').join('') + '</tr>';
+    /* the committee filter belongs to the Bayaan MUN tab only */
+    const cf = $('adCommittee');
+    cf.hidden = view !== 'bayaanmun';
+    cf.innerHTML = '<option value="">All committees</option>' +
+      COMMITTEES.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
     $('adStatus').innerHTML = '<option value="">All statuses</option>' +
       V().statuses.map(s => '<option value="' + s + '">' + s + '</option>').join('');
     $('adSearch').value = '';
@@ -228,9 +270,9 @@
       const data = await SB.select(V().table, V().query || 'select=*&order=created_at.desc');
       if (asked !== view) return;                 // they switched tabs mid-flight
       all = data;
-      /* the Events tab shows seats taken against each committee's cap; a DB
+      /* the Bayaan MUN tab shows seats taken against each committee's cap; a DB
          without the caps table just shows the plain tally */
-      if (view === 'events') {
+      if (view === 'bayaanmun') {
         try {
           caps = Object.fromEntries((await SB.select('event_committee_caps', 'select=event,per_committee'))
             .map(c => [c.event, c.per_committee]));
@@ -256,12 +298,15 @@
   $('adRefresh').addEventListener('click', load);
   $('adSearch').addEventListener('input', paint);
   $('adStatus').addEventListener('change', paint);
+  $('adCommittee').addEventListener('change', paint);
 
   function visible() {
     const q = $('adSearch').value.trim().toLowerCase();
     const st = $('adStatus').value;
+    const cm = view === 'bayaanmun' ? $('adCommittee').value : '';
     return all.filter(r => {
       if (st && r.status !== st) return false;
+      if (cm && r.committee_1 !== cm) return false;
       if (!q) return true;
       return V().haystack(r).join(' ').toLowerCase().includes(q);
     });
@@ -275,7 +320,7 @@
 
     /* MUN: the council assigns committees, so show how the 1st choices fall
        across everyone listed (not rejected) — the imbalance is what needs fixing */
-    if (view === 'mun' || view === 'events') {
+    if (view === 'mun' || view === 'bayaanmun') {
       const tally = {};
       const firsts = view === 'mun'
         ? list.filter(r => r.status !== 'rejected').flatMap(r => members(r).map(m => m.committee_1))
@@ -286,13 +331,13 @@
         : ((BAYAAN.events && BAYAAN.events.list) || []).flatMap(e => e.committees || []);
       const order = known.concat(Object.keys(tally));
       /* Bayaan MUN: a capped committee reads "PNA 12/30" (seats held = not rejected) */
-      const capOf = (c) => view === 'events'
+      const capOf = (c) => view === 'bayaanmun'
         ? (((BAYAAN.events && BAYAAN.events.list) || []).filter(e => (e.committees || []).includes(c))
             .map(e => caps[e.key]).find(Boolean))
         : null;
       const parts = [...new Set(order)].filter(c => tally[c])
         .map(c => c + ' ' + tally[c] + (capOf(c) ? '/' + capOf(c) + (tally[c] >= capOf(c) ? ' (full)' : '') : ''));
-      if (parts.length) count.textContent += (view === 'events' && Object.keys(caps).length ? ' · seats: ' : ' · 1st choices: ') + parts.join(' · ');
+      if (parts.length) count.textContent += (view === 'bayaanmun' && Object.keys(caps).length ? ' · seats: ' : ' · 1st choices: ') + parts.join(' · ');
     }
 
     rows.innerHTML = list.map(r => {
@@ -495,6 +540,16 @@
   }
 
   /* ── CSV ── */
+  /* bayaan-mun-pna-2026-11-23.csv — the committee in the name, so two exports never get mixed up */
+  const slug = (s) => String(s).toLowerCase().replace(/\(.*?\)/g, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  function csvName() {
+    const parts = ['bayaan', { bayaanmun: 'mun', mun: 'bzu-mun' }[view] || view];
+    const cm = view === 'bayaanmun' && $('adCommittee').value;
+    if (cm) parts.push(slug(cm));
+    if ($('adStatus').value) parts.push($('adStatus').value);
+    return parts.join('-') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  }
+
   $('adCsv').addEventListener('click', () => {
     const cols = V().csv;
 
@@ -514,7 +569,7 @@
     const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
     const a = Object.assign(document.createElement('a'), {
       href: url,
-      download: 'bayaan-' + view + '-' + new Date().toISOString().slice(0, 10) + '.csv'
+      download: csvName()
     });
     a.click();
     URL.revokeObjectURL(url);
