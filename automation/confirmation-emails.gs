@@ -60,9 +60,11 @@ const EVENTS = {
     when:  'Friday 27 November 2026',        // add the time once it is fixed, e.g. 'Friday 27 November 2026, 10:00 AM'
     where: '',                               // e.g. 'Seminar Hall, FAST NUCES Multan'
     notes: '',                               // e.g. 'Committee allocations will be shared on WhatsApp.'
+    /* one shared Drive folder holds both guides (2026-11-25); swap in a file link per
+       committee if you want the button to open that committee's PDF directly */
     guides: {
-      'UNSC (Security Council)': '',         // paste the UNSC study guide link here
-      'PNA': ''                              // paste the PNA study guide link here
+      'UNSC (Security Council)': 'https://drive.google.com/drive/folders/1WKL6oracSRgzg51jljI3ATBPKJCpaOHE?usp=sharing',
+      'PNA':                     'https://drive.google.com/drive/folders/1WKL6oracSRgzg51jljI3ATBPKJCpaOHE?usp=sharing'
     }
   },
   workshop: {
