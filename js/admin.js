@@ -32,6 +32,21 @@
   const COMMITTEE_EVENTS = ((BAYAAN.events && BAYAAN.events.list) || []).filter(e => e.committees);
   const inList = '(' + COMMITTEE_EVENTS.map(e => '"' + e.key + '"').join(',') + ')';
   const COMMITTEES = [...new Set(COMMITTEE_EVENTS.flatMap(e => e.committees))];
+  /* the committee a Bayaan MUN registration is seated in: its 1st choice, unless the
+     council moved it to its 2nd (committee_assigned). The confirmation email names this. */
+  const seatOf = (r) => r.committee_assigned || r.committee_1;
+
+  /* 1st / 2nd choice switch. Locked once the confirmation email has gone, because
+     that email already named the seat and it is never sent twice. */
+  const seatCell = (r) => {
+    if (!r.committee_2 || r.committee_2 === r.committee_1)
+      return '<span class="ad__tag">' + esc(r.committee_1 || '—') + '</span>';
+    const sent = !!r.confirmation_sent_at;
+    return '<select class="ad__seat" data-id="' + r.id + '"' + (sent ? ' disabled title="The confirmation email has already named this committee"' : '') + '>' +
+      [[r.committee_1, '1st'], [r.committee_2, '2nd']].map(([c, n]) =>
+        '<option value="' + esc(c) + '"' + (c === seatOf(r) ? ' selected' : '') + '>' + esc(c) + ' (' + n + ')</option>').join('') +
+      '</select>';
+  };
 
   const eventName = (key) => {
     const hit = ((BAYAAN.events && BAYAAN.events.list) || []).find(e => e.key === key);
@@ -100,15 +115,16 @@
     },
 
     /* Bayaan MUN — the popup's committee events, kept apart from the other events.
-       The committee filter (1st choice = the seat it holds) narrows the list AND the CSV. */
+       The committee filter (by seat: 1st choice, or 2nd if moved) narrows the list AND the CSV. */
     bayaanmun: {
       table:    'event_registrations',
       query:    'select=*&event=in.' + inList + '&order=created_at.desc',
       empty:    'No Bayaan MUN registrations yet.',
       statuses: ['pending', 'verified', 'rejected'],
-      headers:  ['', 'Received', 'Name', 'Roll', 'Section', 'WhatsApp', 'Committee (1st · 2nd)', 'Payment', 'Status'],
-      csv:      ['created_at', 'full_name', 'roll_no', 'section', 'email', 'phone',
+      headers:  ['', 'Received', 'Name', 'Roll', 'Section', 'WhatsApp', 'Committee (seat)', 'Payment', 'Status'],
+      csv:      ['created_at', 'full_name', 'roll_no', 'section', 'email', 'phone', 'committee',
                  'committee_1', 'committee_2', 'status', 'verified_at', 'confirmation_sent_at', 'notes'],
+      flatten:  (list) => list.map(r => Object.assign({}, r, { committee: seatOf(r) })),
       haystack: (r) => [r.full_name, r.roll_no, r.section, r.email, r.phone, r.committee_1, r.committee_2, r.status],
       cells: (r) =>
         '<td><button class="ad__more" type="button" aria-label="Show details">+</button></td>' +
@@ -119,11 +135,11 @@
         '<td>' + (r.phone
           ? '<a href="https://wa.me/' + esc(waNumber(r.phone)) + '" target="_blank" rel="noopener">' + esc(r.phone) + '</a>'
           : '—') + '</td>' +
-        '<td><span class="ad__tag">' + esc(r.committee_1 || '—') + '</span>' +
-          (r.committee_2 ? '<br /><span class="ad__dim">' + esc(r.committee_2) + '</span>' : '') + '</td>' +
+        '<td>' + seatCell(r) + '</td>' +
         '<td><button class="ad__btn ad__btn--ghost ad__proof" type="button" data-path="' + esc(r.proof_path) + '">View screenshot</button></td>',
       detail: (r) =>
         '<div><h4>Email</h4><p><a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a></p></div>' +
+        '<div><h4>Choices (1st · 2nd)</h4><p>' + esc([r.committee_1, r.committee_2].filter(Boolean).join(' · ') || '—') + '</p></div>' +
         '<div><h4>Verified</h4><p>' + esc(r.verified_at ? when(r.verified_at) : '—') + '</p></div>' +
         '<div><h4>Confirmation email sent</h4><p>' + esc(r.confirmation_sent_at ? when(r.confirmation_sent_at) : '—') + '</p></div>'
     },
@@ -306,7 +322,7 @@
     const cm = view === 'bayaanmun' ? $('adCommittee').value : '';
     return all.filter(r => {
       if (st && r.status !== st) return false;
-      if (cm && r.committee_1 !== cm) return false;
+      if (cm && seatOf(r) !== cm) return false;
       if (!q) return true;
       return V().haystack(r).join(' ').toLowerCase().includes(q);
     });
@@ -324,7 +340,7 @@
       const tally = {};
       const firsts = view === 'mun'
         ? list.filter(r => r.status !== 'rejected').flatMap(r => members(r).map(m => m.committee_1))
-        : list.filter(r => r.status !== 'rejected' && r.committee_1).map(r => r.committee_1);   // Bayaan MUN rows
+        : list.filter(r => r.status !== 'rejected' && seatOf(r)).map(seatOf);   // Bayaan MUN rows: seats held
       firsts.forEach(c => { tally[c] = (tally[c] || 0) + 1; });
       const known = view === 'mun'
         ? (BAYAAN.mun && BAYAAN.mun.committees) || []
@@ -403,6 +419,33 @@
     } catch (ex) {
       sel.value = was;                      // put it back rather than lie about it
       note.textContent = 'Could not save that: ' + ex.message;
+    } finally {
+      sel.disabled = false;
+    }
+  });
+
+  /* Bayaan MUN seat: 1st or 2nd choice. Saved as committee_assigned (NULL = 1st choice).
+     The database refuses a full committee (committee_full), so this can't overshoot a cap.
+     Set it BEFORE verifying: the confirmation email names the seat at the moment it is sent. */
+  rows.addEventListener('change', async (e) => {
+    const sel = e.target.closest('.ad__seat');
+    if (!sel) return;
+    const row = all.find(r => r.id === sel.dataset.id);
+    const was = seatOf(row);
+    const want = sel.value;
+    const assigned = want === row.committee_1 ? null : want;
+
+    sel.disabled = true;
+    try {
+      await SB.patch(V().table, 'id=eq.' + row.id, { committee_assigned: assigned });
+      row.committee_assigned = assigned;
+      note.textContent = '';
+      paint();                              // the seat tally and committee filter follow the change
+    } catch (ex) {
+      sel.value = was;
+      note.textContent = /committee_full/.test(ex.message)
+        ? want + ' is full, so ' + row.full_name + ' stays in ' + was + '.'
+        : 'Could not move that seat: ' + ex.message;
     } finally {
       sel.disabled = false;
     }

@@ -290,18 +290,26 @@ pre-selects it. Per event:
 `["UNSC (Security Council)", "PNA"]`. Its registrations have **their own admin tab, Bayaan MUN**
 (added 2026-11-23), so they never mix with the other events: any event with `committees` goes
 there, and the **Events** tab shows only the rest (the workshop). The Bayaan MUN tab lists name,
-roll, section, WhatsApp (opens a chat), committees (1st, with the 2nd underneath) and the
-screenshot; the count line shows seats taken (e.g. `seats: UNSC (Security Council) 12/30 · PNA 1/30`).
-A **committee filter** (All / UNSC (Security Council) / PNA — by 1st choice, the seat a row holds)
-works with search and the status filter, and **Export CSV exports exactly what is listed**, named
-after it: `bayaan-mun-2026-11-23.csv`, `bayaan-mun-pna-….csv`, `bayaan-mun-unsc-verified-….csv`.
-Columns: received, name, roll, section, email, phone, `committee_1`, `committee_2`, status,
-`verified_at`, `confirmation_sent_at`, notes.
+roll, section, WhatsApp (opens a chat), the **committee seat** and the screenshot (expand a row
+for both choices); the count line shows seats taken (e.g. `seats: UNSC (Security Council) 12/30 · PNA 1/30`).
+
+**Seat = 1st choice, unless you move it (added 2026-11-25).** Someone who gave a 2nd choice
+gets a dropdown in the Committee column — `UNSC (Security Council) (1st)` / `PNA (2nd)`.
+Switching it saves `committee_assigned` (NULL = 1st choice); the database refuses a move into a
+full committee ("PNA is full, so … stays in …"). **Set the seat before verifying**: the
+confirmation email names the seat at the moment it is sent, so the dropdown locks once
+`confirmation_sent_at` is stamped.
+
+A **committee filter** (All / UNSC (Security Council) / PNA — by seat) works with search and the
+status filter, and **Export CSV exports exactly what is listed**, named after it:
+`bayaan-mun-2026-11-23.csv`, `bayaan-mun-pna-….csv`, `bayaan-mun-unsc-verified-….csv`.
+Columns: received, name, roll, section, email, phone, `committee` (the seat), `committee_1`,
+`committee_2`, status, `verified_at`, `confirmation_sent_at`, notes.
 
 **Seat caps — 30 per committee (added 2026-11-23).** The venue can't hold more than 30 in a
 committee, so each Bayaan MUN committee stops at **30 registrations**. A registration takes its
-seat in its **1st choice**; *pending* and *verified* rows hold a seat, **rejecting a row frees
-it**. The cap lives in the database (`supabase/events.sql`, table `event_committee_caps`), not
+seat in its **1st choice** (or its 2nd, if moved — see above); *pending* and *verified* rows
+hold a seat, **rejecting a row frees it**. The cap lives in the database (`supabase/events.sql`, table `event_committee_caps`), not
 in `data.js`:
 * a trigger refuses the registration that would go over (with a lock, so two people racing for
   the last seat cannot both get it) — the form shows "This committee just filled up — pick
@@ -334,7 +342,7 @@ quota guard first.)
 |---|---|
 | Anyone (the popup) | upload one image to the bucket, and insert a row with status `pending` — nothing else |
 | Anyone | **cannot read, list, overwrite or delete** any screenshot or row |
-| An admin | read every row and screenshot (through a 5-minute signed link), set `status` and `notes` |
+| An admin | read every row and screenshot (through a 5-minute signed link), set `status`, `notes` and `committee_assigned` (only to one of the row's own two choices) |
 
 The bucket itself rejects anything over **5 MB** or that is not JPG / PNG / WebP, so those
 limits hold even if someone bypasses `js/events.js`. One registration per roll number
@@ -354,7 +362,10 @@ servers under the society's Gmail; the copy in the repo is for versioning and re
 
 1. **Confirmations.** Rows marked `verified` with no `confirmation_sent_at` get a
    "Registration successful" email (it lists the sessions, date and venue from `EVENTS`),
-   then the row is stamped so nobody is emailed twice.
+   then the row is stamped so nobody is emailed twice. For **Bayaan MUN** it also names the
+   person's **committee** (their seat: 1st choice, or 2nd if moved on the admin board) and,
+   when `EVENTS['bayaan-mun'].guides` has a link for that committee, a button to **that
+   committee's study guide** (added 2026-11-25). `testEmail` sends you one sample per committee.
 2. **Broadcasts.** Anything queued from the admin board's **Broadcast** tab (below).
 
 Polling means a missed run just catches up. There is no n8n and no server.

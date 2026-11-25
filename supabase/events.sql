@@ -150,12 +150,25 @@ create policy "admins may read payment proofs"
 -- ─────────────────────────────────────────────────────────────────────
 --  SEAT CAPS PER COMMITTEE (added 2026-11-23 for Bayaan MUN: 30 a committee)
 --  A row here caps how many registrations one committee of that event can
---  hold. A registration takes a seat in its `committee_1`; `pending` and
---  `verified` rows hold one, `rejected` rows free it. Events with no row here
---  are not capped. The trigger is the authority — the popup only mirrors it.
+--  hold. A registration takes a seat in its 1st choice (`committee_1`) unless
+--  the council moves it to its 2nd choice (`committee_assigned`, set from the
+--  admin board, 2026-11-25). `pending` and `verified` rows hold a seat,
+--  `rejected` rows free it. Events with no row here are not capped. The
+--  trigger is the authority — the popup only mirrors it.
 --  Change a cap:  update public.event_committee_caps set per_committee = 40
 --                 where event = 'bayaan-mun';
 -- ─────────────────────────────────────────────────────────────────────
+
+-- The committee the council seats someone in, when it is not their 1st choice.
+-- NULL = their 1st choice. It may only name one of their own two choices.
+-- The confirmation email (automation/confirmation-emails.gs) names this seat.
+alter table public.event_registrations add column if not exists committee_assigned text;
+alter table public.event_registrations drop constraint if exists ev_committee_assigned_choice;
+alter table public.event_registrations
+  add constraint ev_committee_assigned_choice check (
+    committee_assigned is null or committee_assigned in (committee_1, committee_2));
+grant update (status, notes, committee_assigned) on public.event_registrations to authenticated;
+
 create table if not exists public.event_committee_caps (
   event         text primary key,
   per_committee int  not null check (per_committee between 1 and 1000)
@@ -182,14 +195,15 @@ security definer
 set search_path = public
 as $$
 declare
+  v_seat  text := coalesce(new.committee_assigned, new.committee_1);
   v_cap   int;
   v_taken int;
 begin
-  if new.committee_1 is null or new.status = 'rejected' then
+  if v_seat is null or new.status = 'rejected' then
     return new;
   end if;
   if tg_op = 'UPDATE' and old.status <> 'rejected'
-     and old.committee_1 is not distinct from new.committee_1 then
+     and coalesce(old.committee_assigned, old.committee_1) is not distinct from v_seat then
     return new;                         -- already holds this seat
   end if;
 
@@ -198,18 +212,18 @@ begin
     return new;                         -- this event is not capped
   end if;
 
-  perform pg_advisory_xact_lock(hashtext('seat:' || new.event || ':' || new.committee_1));
+  perform pg_advisory_xact_lock(hashtext('seat:' || new.event || ':' || v_seat));
 
   select count(*) into v_taken
     from event_registrations
    where event = new.event
-     and committee_1 = new.committee_1
+     and coalesce(committee_assigned, committee_1) = v_seat
      and status <> 'rejected'
      and (tg_op = 'INSERT' or id <> new.id);
 
   if v_taken >= v_cap then
-    -- js/events.js looks for the word committee_full in this message
-    raise exception 'committee_full: % is full (% seats)', new.committee_1, v_cap
+    -- js/events.js and js/admin.js look for the word committee_full in this message
+    raise exception 'committee_full: % is full (% seats)', v_seat, v_cap
       using errcode = 'P0001';
   end if;
   return new;
@@ -218,7 +232,7 @@ $$;
 
 drop trigger if exists event_registrations_seat_check on public.event_registrations;
 create trigger event_registrations_seat_check
-  before insert or update of status, committee_1 on public.event_registrations
+  before insert or update of status, committee_1, committee_assigned on public.event_registrations
   for each row execute function public.event_registrations_seat_check();
 
 -- What the popup reads to grey out full committees: the cap and the seats taken
@@ -235,10 +249,10 @@ as $$
            'seats', c.per_committee,
            'taken', coalesce((
               select jsonb_object_agg(t.committee_1, t.n)
-                from (select committee_1, count(*) as n
+                from (select coalesce(committee_assigned, committee_1) as committee_1, count(*) as n
                         from event_registrations
                        where event = p_event and status <> 'rejected' and committee_1 is not null
-                       group by committee_1) t), '{}'::jsonb))
+                       group by 1) t), '{}'::jsonb))
          end
     from (select p_event as e) x
     left join event_committee_caps c on c.event = x.e;

@@ -23,6 +23,10 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   **Seat caps** (2026-11-23): table `event_committee_caps` (Bayaan MUN = 30 per committee) + trigger `event_registrations_seat_check`
   (counts `committee_1`, not-rejected rows, advisory lock) + public RPC `event_committee_seats(p_event)` (counts only) that the popup
   uses to mark committees full / "N seats left" and to close the form when all are full. Admin Bayaan MUN tab shows "12/30".
+  **Seat** = `coalesce(committee_assigned, committee_1)` (2026-11-25): admin dropdown moves a row to its 2nd choice (check constraint: only
+  its own choices; locks once `confirmation_sent_at` is set). Caps, RPC, filter, tally, CSV `committee` column and the confirmation email all use the seat.
+  The email adds "Committee: <seat>" + a study-guide button from `EVENTS['bayaan-mun'].guides[<seat>]` in the .gs (links filled in by the user).
+  Study guides/roster PDFs live outside the repo in `C:/Users/Super/Documents/Bayaan-posters/study-guides/`.
   "Already registered" is stored per set of open events (`bayaan.ev.done.<keys>`), so an old workshop registration doesn't hide a new event's popup.
   Other doors in (all `[data-ev-open]`, hidden until events.js enables them): top-bar button, hero chip, home ticket card (`#evTicket`), drawer item, scroll-aware pill.
   `/?register` or `/#/register` force-opens it even for a browser that already registered.
@@ -35,7 +39,7 @@ never commit secrets. `README.md` is the detailed reference; keep it current.
   the security-definer RPC `submit_mun_delegation()` (atomic; the real fee `v_fee` lives there — keep `BAYAAN.mun.fee` in step).
   One delegation per roll number per conference. Screenshots in `payment-proofs/mun/`. No email for MUN (decided 2026-11-04).
 - **Admin board** `admin.html` + `js/admin.js`: tabs Induction / Events (verify payments, view screenshot via signed link; events WITHOUT `committees` only — PostgREST `event=not.in.(…)`) /
-  **Bayaan MUN** (events WITH `committees`: WhatsApp + committee columns, seats "12/30", committee filter #adCommittee by `committee_1`; CSV = what's listed, file named `bayaan-mun[-committee][-status]-date.csv`) /
+  **Bayaan MUN** (events WITH `committees`: WhatsApp + seat dropdown `.ad__seat` (1st/2nd), seats "12/30", committee filter #adCommittee by seat; CSV = what's listed, file named `bayaan-mun[-committee][-status]-date.csv`) /
   BZU MUN (view key `mun`; delegations, expand for members, CSV = one line per delegate) / Broadcast.
 - **Broadcasts** (`supabase/broadcasts.sql`): admin queues a message or certificates for an event; the Apps Script sends it. The page never sends mail.
 - **Mailer**: `automation/confirmation-emails.gs` — Google Apps Script run from the society Gmail on a 5-minute timer (`tick`):

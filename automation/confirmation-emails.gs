@@ -49,13 +49,21 @@ const REPLY_TO   = '';                       // optional, e.g. the society's Ins
 
 /* Keys must match `key` in BAYAAN.events.list (js/data.js). Leave `when`, `where`
    or `notes` as '' and that line is simply left out of the email. `includes` is an
-   optional list of sessions one registration covers; omit it for a single session. */
+   optional list of sessions one registration covers; omit it for a single session.
+   `guides` (committee events): the study-guide link for each committee, keyed by the
+   committee's exact name in js/data.js. The email names the person's committee — their
+   1st choice, or their 2nd if the admin board moved them — and links that committee's
+   guide. A committee left as '' simply gets no link. */
 const EVENTS = {
   'bayaan-mun': {
     name:  'Bayaan MUN',
     when:  'Friday 27 November 2026',        // add the time once it is fixed, e.g. 'Friday 27 November 2026, 10:00 AM'
     where: '',                               // e.g. 'Seminar Hall, FAST NUCES Multan'
-    notes: ''                                // e.g. 'Committee allocations will be shared on WhatsApp.'
+    notes: '',                               // e.g. 'Committee allocations will be shared on WhatsApp.'
+    guides: {
+      'UNSC (Security Council)': '',         // paste the UNSC study guide link here
+      'PNA': ''                              // paste the PNA study guide link here
+    }
   },
   workshop: {
     name:  'Workshop',
@@ -96,9 +104,12 @@ function tick() {
 /* ══ 1. confirmations ═══════════════════════════════════════════════════════ */
 
 function confirmVerified_() {
+  /* select=* rather than a column list: the committee columns (committee_1,
+     committee_assigned) only exist once supabase/events.sql has been run, and naming a
+     missing column would make every confirmation fail */
   const rows = sb_('get',
     'event_registrations?status=eq.verified&confirmation_sent_at=is.null' +
-    '&select=id,event,full_name,roll_no,email&order=verified_at.asc&limit=' + CONFIRM_LIMIT);
+    '&select=*&order=verified_at.asc&limit=' + CONFIRM_LIMIT);
 
   let sent = 0;
   for (const r of rows) {
@@ -135,12 +146,18 @@ function buildConfirmation_(r) {
   const ev   = eventOf_(r.event);
   const name = displayName_(r.full_name);
 
+  /* committee events: the seat is their 1st choice unless the admin board moved them */
+  const seat  = r.committee_assigned || r.committee_1 || '';
+  const guide = seat && ev.guides && /^https?:\/\//i.test(ev.guides[seat] || '') ? ev.guides[seat] : '';
+
   const details = detailRows_(ev);
+  if (seat) details.splice(1, 0, ['Committee', seat]);
   const text =
     'Assalam-o-Alaikum ' + name + ',\n\n' +
     'Registration successful! Your payment has been verified and your registration for ' +
       ev.name + ' is confirmed.\n\n' +
     details.map(function (d) { return d[0] + ': ' + d[1]; }).join('\n') + '\n' +
+    (guide ? '\nStudy guide for ' + seat + ': ' + guide + '\nPlease read it before the conference.\n' : '') +
     (ev.notes ? '\n' + ev.notes + '\n' : '') +
     '\nRoll number on this registration: ' + r.roll_no + '\n' +
     'Keep this email — you may be asked to show it at the door.\n\n' +
@@ -150,6 +167,12 @@ function buildConfirmation_(r) {
     '<p style="margin:0 0 16px">Your payment has been verified and your registration for ' +
       '<b style="color:#F6D68A">' + esc_(ev.name) + '</b> is confirmed.</p>' +
     tableHtml_(details) +
+    (guide
+      ? '<p style="margin:0 0 8px">Your committee\'s study guide — please read it before the conference:</p>' +
+        '<p style="margin:0 0 18px"><a href="' + esc_(guide) + '" style="display:inline-block;background:#E3A72F;' +
+          'color:#140B0C;text-decoration:none;font-weight:bold;padding:10px 18px;border-radius:999px">' +
+          esc_(seat) + ' study guide</a></p>'
+      : '') +
     (ev.notes ? '<p style="margin:0 0 16px">' + esc_(ev.notes) + '</p>' : '') +
     '<p style="margin:0 0 16px;font-size:13px;color:#8E7F74">Roll number on this registration: ' +
       esc_(r.roll_no) + '. Keep this email — you may be asked to show it at the door.</p>');
@@ -371,13 +394,18 @@ function checkConnection() {
   console.log(timers.length ? 'Timer: installed — runs automatically.' : 'Timer: NOT installed — run installTrigger, or nothing is ever sent.');
 }
 
-/* Sends a sample of each event's confirmation to YOU only. Touches no registration. */
+/* Sends a sample of each event's confirmation to YOU only — one per committee for a
+   committee event, so you can check every study-guide link. Touches no registration. */
 function testEmail() {
   const me = Session.getEffectiveUser().getEmail();
   Object.keys(EVENTS).forEach(function (key) {
-    const mail = buildConfirmation_({ event: key, full_name: 'test student', roll_no: '25M-0000', email: me });
-    MailApp.sendEmail({ to: me, subject: '[TEST] ' + mail.subject, body: mail.text,
-                        htmlBody: mail.html, name: SENDER });
+    const seats = Object.keys(EVENTS[key].guides || {});
+    (seats.length ? seats : [null]).forEach(function (seat) {
+      const mail = buildConfirmation_({ event: key, full_name: 'test student', roll_no: '25M-0000',
+                                        email: me, committee_1: seat });
+      MailApp.sendEmail({ to: me, subject: '[TEST] ' + mail.subject, body: mail.text,
+                          htmlBody: mail.html, name: SENDER });
+    });
   });
   console.log('Sample emails sent to ' + me + '.');
 }
